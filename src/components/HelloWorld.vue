@@ -1,4 +1,4 @@
-<script setup>
+<script setup> 
 import { inject,computed } from 'vue' 
 const posts=inject('posts')
 const totalComments = computed(() => {

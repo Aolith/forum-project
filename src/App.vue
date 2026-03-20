@@ -3,6 +3,7 @@
     <nav v-if="!$route.meta.hideNav">
       <router-link to="/">论坛首页</router-link>
       <router-link to="/about">关于我</router-link>
+      <router-link to="/demo">练习</router-link>
       <button @click="toggleTheme">切换主题</button>
     </nav>
     <router-view />
@@ -32,7 +33,7 @@ watch(posts, (newPosts) => {
 function addPost(content) {
   posts.value.push({
     id: Date.now(),
-    title: '新帖子',
+    title:'新帖子',
     content,
     likes:0,
     comments:[]
