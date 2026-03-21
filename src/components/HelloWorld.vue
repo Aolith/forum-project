@@ -1,9 +1,12 @@
 <script setup> 
-import { inject,computed } from 'vue' 
-const posts=inject('posts')
+import { computed } from 'vue' 
+import { usePostsStore } from '@/stores/post'
+const postsStore=usePostsStore()
+const posts=postsStore.posts
 const totalComments = computed(() => {
-  return posts.value.reduce((sum, post) => sum + post.comments.length, 0)
+  return posts.reduce((sum, post) => sum + post.comments.length, 0)
 })
+
 </script> 
 
 <template>
@@ -16,6 +19,7 @@ const totalComments = computed(() => {
         <router-link :to="'/post/'+post.id" class="post-link">
         <h2 >{{ post.title }}</h2>
         <p>评论数:{{ post.comments.length }}</p>
+        <p class="likes">点赞数:{{ post.likes}}</p>
         </router-link>
     </div>
   </div>
@@ -47,6 +51,10 @@ p {
 .post p {
   margin-left: 10px;
   display: inline;
-  color: rgb(203, 199, 255);
+  color: rgb(139, 131, 255);
+}
+.post .likes {
+  font-size: 14px;
+  color: rgb(255, 89, 86);
 }
 </style>

@@ -1,14 +1,15 @@
 <script setup>
-import { ref ,inject} from 'vue'
-const addPost=inject('addPost')
-// 定义要触发的事件
+import { ref } from 'vue'
+
+import { usePostsStore } from '@/stores/post'
+const postsStore=usePostsStore()
 
 const content = ref('')
 
 function submit() {
   if (content.value.trim()) {
     // 触发 addPost 事件，把输入内容传出去
-    addPost(content.value)
+    postsStore.addPost(content.value)
     content.value = '' // 清空输入框
   } else {
     alert('内容不能为空')

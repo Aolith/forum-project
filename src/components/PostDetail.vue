@@ -2,12 +2,13 @@
 import CommentForm from './CommentForm.vue'
 import CommentList from './CommentList.vue'
 import LikeButton from './LikeButton.vue';
-  import { inject,computed,watch,ref} from 'vue';
+  import { computed,watch,ref} from 'vue';
   import { useRoute,useRouter } from 'vue-router';
+  import { usePostsStore } from '@/stores/post'
+  const postsStore=usePostsStore()
   const route=useRoute()
   const router=useRouter()
-  const posts=inject('posts')
-  const post = computed(() => posts.value.find(p => p.id === Number(route.params.id)))
+  const post = computed(() => postsStore.posts.find(p => p.id === Number(route.params.id)))
   function goHome() {
     router.push('/')
   }
@@ -19,12 +20,12 @@ import LikeButton from './LikeButton.vue';
   console.log("热门帖子!")
 },{immediate:true})
   //
-  const deletePost = inject('deletePost')
-  const likesCount = inject('likesCount')
-  const updatePosts = inject('updatePosts')
-  const addComment=inject('addComment')
-  const deleteComment=inject('deleteComment')
-  const saveComment=inject('saveComment')
+  const deletePost = postsStore.deletePost
+  const likesCount = postsStore.likesCount
+  const updatePosts = postsStore.updatePosts
+  const addComment=postsStore.addComment
+  const deleteComment=postsStore.deleteComment
+  const saveComment=postsStore.saveComment
 //删除帖子
   function deletes(postId){
     if(confirm("确定要删除吗？")){
