@@ -4,6 +4,7 @@
       <router-link to="/">论坛首页</router-link>
       <router-link to="/about">关于我</router-link>
       <router-link to="/demo">练习</router-link>
+      <router-link to="/Login">登录</router-link> 
       <button @click="themeStore.toggleTheme">切换主题</button>
     </nav>
     <router-view />
