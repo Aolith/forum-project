@@ -65,6 +65,6 @@ export const useUserStore = defineStore('user', () => {
       name:nameId
     })
   }
-  return { users, currentUser, userLogin, logout,addUser }
+  return { users, currentUser, userLogin, logout, addUser }
 })
 
