@@ -1,10 +1,15 @@
 <template>
   <div :class="themeStore.theme" style="min-height: 100vh;">
     <nav v-if="!$route.meta.hideNav">
-      <router-link to="/">论坛首页</router-link>
-      <router-link to="/about">关于我</router-link>
-      <router-link to="/Login">登录</router-link> 
-      <button @click="themeStore.toggleTheme">切换主题</button>
+      <div v-if="!userStore.currentUser">
+        <router-link to="/Login"></router-link> 
+      </div>
+      <div v-else>
+        <router-link to="/">论坛首页</router-link>
+        <router-link to="/about">写帖子</router-link>
+        <button @click="userStore.logout">退出登录</button>
+        <button @click="themeStore.toggleTheme">切换主题</button>
+      </div>
     </nav>
     <router-view />
   </div>
@@ -12,7 +17,9 @@
 
 <script setup>
 import { useThemeStore } from '@/stores/theme'
+import { useUserStore } from './stores/user';
 const themeStore=useThemeStore()
+const userStore=useUserStore()
 </script>
 
 <style>
@@ -44,5 +51,12 @@ nav a {
 nav a.router-link-active {
   font-weight: bold;
   color: #42b983;
+}
+nav button {
+  margin-left: 10px;
+}
+nav div {
+  display: inline-block;
+
 }
 </style>

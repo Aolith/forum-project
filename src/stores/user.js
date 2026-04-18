@@ -55,7 +55,9 @@ export const useUserStore = defineStore('user', () => {
   }
   // 添加 退出登录 方法
   function logout() {
-    currentUser.value = null
+    if(confirm("确认退出登录吗?")){
+      currentUser.value = null
+    }
   }
   //添加新用户(注册)
   function addUser(nameId,snoId,numId){

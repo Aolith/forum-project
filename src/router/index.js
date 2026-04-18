@@ -17,7 +17,7 @@ const router = createRouter({
   routes
 })
 //路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _, next) => {
   const userStore = useUserStore()
   if (to.meta.requiresAuth && !userStore.currentUser) {
     next('/Login')
