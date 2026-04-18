@@ -1,16 +1,55 @@
 <script setup>
-
+import { useUserStore } from '@/stores/user';
+import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+const router=useRouter()
+const userStore=useUserStore()
+const nameId=ref('')
+const snoId=ref('')
+const numId=ref('')
+//正则
+function validateSno(s){
+  return /^\d{10}$/.test(s)
+}
+function validatePassword(n){
+  return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(n)
+}
+//跳转登录
+function goLogin(){
+  alert('注册成功!请重新登录!')
+  router.push('/Login')
+}
+function handleRegister(){
+  if (!validateSno(snoId.value)) {
+    alert('学号必须是10位数字')
+    return
+  }
+  if (!validatePassword(numId.value)) {
+    alert('密码必须包含字母和数字,长度8-16位')
+    return
+  }
+  const inputSno = snoId.value.trim()
+  if(userStore.users.some(u => u.sno === inputSno)){
+    alert('该学号已被注册!')
+    return
+  }
+  //验证完成添加新用户
+  userStore.addUser(nameId.value,snoId.value,numId.value)
+  console.log('添加后的所有用户:', userStore.users.value)
+  //注册完跳转登录页
+  goLogin()
+}
 </script>
 
 <template>
     <div class="Registerarea">
     <h2>请完成注册</h2>
     <div class="Register_form">
-      <form>
+      <form @submit.prevent="handleRegister">
         <ul>
-          <li><label for="name" class="inp">姓名：</label><input type="text" id="name" ></li>
-          <li><label for="sno" class="inp">学号：</label><input type="text" id="sno" ></li>
-          <li><label for="num" class="inp">密码：</label><input type="text" id="num" ></li>
+          <li><label for="name" class="inp">姓名：</label><input type="text" id="name" v-model="nameId"></li>
+          <li><label for="sno" class="inp">学号：</label><input type="text" id="sno" v-model="snoId"></li>
+          <li><label for="num" class="inp">密码：</label><input type="text" id="num" v-model="numId"></li>
           <li class="subRegister">
             <input type="submit" value="确认注册" class="btn">
           </li>

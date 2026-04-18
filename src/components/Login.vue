@@ -7,23 +7,11 @@ const userStore=useUserStore()
 const snoId=ref('')
 const numId=ref('')
 
-function validateSno(s){
-  return /^\d{10}$/.test(s)
-}
-function validatePassword(n){
-  return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(n)
-}
 function handleLogin(){
-
-  if (!validateSno(snoId.value)) {
-    alert('学号必须是10位数字')
+  if (!snoId.value || !numId.value){
+    alert('学号和密码不能为空!')
     return
   }
-  if (!validatePassword(numId.value)) {
-    alert('密码必须包含字母和数字,长度8-16位')
-    return
-  }
-
   const result=userStore.userLogin(snoId.value,numId.value)
   if(result.success){
      router.push('/')

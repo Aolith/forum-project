@@ -43,12 +43,12 @@ export const useUserStore = defineStore('user', () => {
     //通过sno比对 对应的password,用find？
     const found=users.value.find(users=>users.sno===snoId)
     if(!found){
-      //密码不正确
-      return { success: false, msg: '密码不正确!' }
-    }
-    if(found.password !== numId){
       //没找到对应学号、学号不存在
       return { success: false, msg: '学号不存在!' }
+    }
+    if(found.password !== numId){
+      //密码不正确
+      return { success: false, msg: '密码不正确!' }
     }
     currentUser.value = { sno: found.sno, name: found.name }  // 只保存必要信息，不保存密码
     return { success: true, msg: '' }
@@ -57,7 +57,14 @@ export const useUserStore = defineStore('user', () => {
   function logout() {
     currentUser.value = null
   }
-
-  return { users, currentUser, userLogin, logout }
+  //添加新用户(注册)
+  function addUser(nameId,snoId,numId){
+    users.value.push({
+      sno:snoId,
+      password:numId,
+      name:nameId
+    })
+  }
+  return { users, currentUser, userLogin, logout,addUser }
 })
 
