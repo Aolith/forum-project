@@ -40,7 +40,7 @@ export const useUserStore = defineStore('user', () => {
 
 
   function userLogin (snoId,numId){
-    //通过sno比对 对应的password,用find？
+    //通过sno比对 对应的password,用find
     const found=users.value.find(users=>users.sno===snoId)
     if(!found){
       //没找到对应学号、学号不存在
