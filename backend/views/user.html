@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%=title%></title>
+</head>
+<body>
+  <h1>欢迎回来，<%=id%></h1>
+  <%=html%>
+  <%-html%>
+  <ul>
+    <% for (let i=0; i<user.length ; i++) { %>
+    <li><%=user[i].username%>-<%=user[i].gender%></li>
+    <% } %>
+  </ul>
+</body>
+</html>
