@@ -15,10 +15,9 @@ import LikeButton from './LikeButton.vue';
   //
   const commentText=ref('')
   //watch监听
-  watch(() => post.value.likes,(newlikes)=>{
-  if(newlikes>=10)
-  console.log("热门帖子!")
-},{immediate:true})
+ watch(() => post.value?.likes, (newlikes) => {
+  if (newlikes && newlikes >= 10) console.log("热门帖子!")
+}, { immediate: true })
   //
   const deletePost = postsStore.deletePost
   const likesCount = postsStore.likesCount

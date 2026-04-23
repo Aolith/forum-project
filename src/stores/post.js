@@ -11,12 +11,16 @@ export const usePostsStore = defineStore('post', () => {
 
   let saved = null
   try {
-   saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
+    const raw = localStorage.getItem(STORAGE_KEY)
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) {   // 关键：只有数组才用
+      saved = parsed
+    }
   } catch (e) {
-    console.warn('Failed to parse posts from localStorage', e)
+    console.warn('localStorage 数据损坏，已忽略', e)
   }
-  const posts = ref(saved || defaultPosts) //帖子数据
-
+  const posts = ref(saved || defaultPosts)
+  
   //添加watch
   watch(posts, (newPosts) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newPosts))
@@ -24,31 +28,65 @@ export const usePostsStore = defineStore('post', () => {
 
 
   // 添加帖子的方法
-  function addPost(content) {
-    posts.value.push({
-    id: Date.now(),
-    title:'新帖子',
-    content,
-    likes:0,
-    comments:[]
+async function addPost(content) {
+  try {
+    const res = await fetch('http://localhost:3001/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content })  // 只传 content，因为 title 后端固定
     })
+    if (!res.ok) throw new Error('新增失败')
+    const data = await res.json()   // 后端返回整个新数组
+    posts.value = data             // 直接替换本地状态
+  } catch (err) {
+    console.error('新增帖子失败：', err)
   }
-
-  //删除帖子
-function deletePost(id){
-  posts.value=posts.value.filter(post=>post.id!==id)
 }
 
-//点赞帖子
-function likesCount(id){
-  const found = posts.value.find(post => post.id===id);
-  found.likes++
+  //删除帖子
+async function deletePost(id){
+  try{
+    const res=await fetch(`http://localhost:3001/api/posts/${id}`,{
+      method:'DELETE',
+      //delete无请求体
+    })
+    if(!res.ok)throw new Error('删除失败')
+    const data=await res.json()
+    posts.value=data
+  }catch(err){
+    console.error('删除帖子失败',err)
+  }
 }
 
 //编辑帖子
-function updatePosts(id,newContent){
-  const found = posts.value.find(post => post.id===id);
-  found.content=newContent
+async function updatePosts(id,newContent){
+  try{
+    const res=await fetch(`http://localhost:3001/api/posts/${id}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({content:newContent})
+    })
+    if(!res.ok)throw new Error('编辑失败')
+    const data=await res.json()
+    posts.value=data
+  }catch(err){
+    console.error('编辑帖子失败',err)
+  }
+}
+
+//点赞帖子
+async function likesCount(id) {
+  try{
+    const res=await fetch(`http://localhost:3001/api/posts/${id}/likes`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'}
+    })
+    if(!res.ok)throw new Error('点赞失败')
+    const data=await res.json()
+    posts.value=data
+  }catch(err){
+    console.error('点赞帖子失败',err)
+  }
 }
 
 //提交评论
