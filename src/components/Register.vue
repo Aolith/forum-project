@@ -19,7 +19,7 @@ function goLogin(){
   alert('注册成功!请重新登录!')
   router.push('/Login')
 }
-function handleRegister(){
+async function handleRegister(){
   if (!validateSno(snoId.value)) {
     alert('学号必须是10位数字')
     return
@@ -28,16 +28,14 @@ function handleRegister(){
     alert('密码必须包含字母和数字,长度8-16位')
     return
   }
-  const inputSno = snoId.value.trim()
-  if(userStore.users.some(u => u.sno === inputSno)){
-    alert('该学号已被注册!')
-    return
-  }
   //验证完成添加新用户
-  userStore.addUser(nameId.value,snoId.value,numId.value)
-  console.log('添加后的所有用户:', userStore.users.value)
-  //注册完跳转登录页
-  goLogin()
+  const result = await userStore.addUser(nameId.value, snoId.value, numId.value)
+  if(result.success){
+    //注册完跳转登录页
+    goLogin()
+  }else{
+    alert(result.msg)
+  }
 }
 </script>
 

@@ -38,35 +38,53 @@ export const useUserStore = defineStore('user', () => {
     }
   })
 
-
-  function userLogin (snoId,numId){
-    //通过sno比对 对应的password,用find
-    const found=users.value.find(users=>users.sno===snoId)
-    if(!found){
-      //没找到对应学号、学号不存在
-      return { success: false, msg: '学号不存在!' }
+//用户登录
+async function userLogin(snoId,numId){
+  try{
+    const res=await fetch('http://localhost:3001/api/users/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({sno:snoId,password:numId})
+    })
+    if(!res.ok){
+      const errorData = await res.json()
+      return { success: false, msg: errorData.error || '登录失败' }
     }
-    if(found.password !== numId){
-      //密码不正确
-      return { success: false, msg: '密码不正确!' }
-    }
-    currentUser.value = { sno: found.sno, name: found.name }  // 只保存必要信息，不保存密码
+    const data=await res.json()
+    currentUser.value=data.user
     return { success: true, msg: '' }
+  }catch(err){
+    console.error('用户登录失败',err)
+    return { success: false, msg: '网络错误，请稍后重试' }
   }
-  // 添加 退出登录 方法
+}
+
+//添加新用户(注册)
+async function addUser(nameId,snoId,numId) {
+  try{
+    const res=await fetch('http://localhost:3001/api/users/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({sno:snoId,password:numId,name:nameId})
+    })
+    if(!res.ok){
+      const errorData = await res.json()
+      return { success: false, msg: errorData.error || '注册失败' }
+    }
+    return { success: true, msg: '' }
+  }catch(err){
+    console.error('用户注册失败',err)
+    return { success: false, msg: '网络错误，请稍后重试' }
+  }
+}    
+
+//退出登录
   function logout() {
     if(confirm("确认退出登录吗?")){
       currentUser.value = null
     }
   }
-  //添加新用户(注册)
-  function addUser(nameId,snoId,numId){
-    users.value.push({
-      sno:snoId,
-      password:numId,
-      name:nameId
-    })
-  }
+
   return { users, currentUser, userLogin, logout, addUser }
 })
 

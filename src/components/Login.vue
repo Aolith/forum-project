@@ -7,12 +7,12 @@ const userStore=useUserStore()
 const snoId=ref('')
 const numId=ref('')
 
-function handleLogin(){
+async function handleLogin(){
   if (!snoId.value || !numId.value){
     alert('学号和密码不能为空!')
     return
   }
-  const result=userStore.userLogin(snoId.value,numId.value)
+  const result=await userStore.userLogin(snoId.value,numId.value)
   if(result.success){
      router.push('/')
   }else{
@@ -25,12 +25,12 @@ function handleLogin(){
     <div class="loginarea">
     <h2>请完成登录</h2>
     <div class="Login_form">
-      <form>
+      <form @submit.prevent="handleLogin">
         <ul>
           <li><label for="sno" class="inp">学号：</label><input type="text" id="sno" v-model="snoId"></li>
           <li><label for="num" class="inp">密码：</label><input type="text" id="num" v-model="numId"></li>
           <li class="subLogin">
-            <input type="submit" value="确认登录" class="btn" @click="handleLogin">
+            <input type="submit" value="确认登录" class="btn">
           </li>
           <li class="link"><p>没有账号,去<router-link to="/Register">注册</router-link></p></li>
         </ul>

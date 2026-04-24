@@ -16,6 +16,10 @@ app.use('/api/posts',postRouter)
 const commentRouter=require('./router/comments')
 app.use('/api/posts/:postId/comments',commentRouter)
 
+//引入user路由
+const userRouter=require('./router/users')
+app.use('/api/users',userRouter)
+
 //在指定端口启动服务器
 app.listen(port,()=>{
   console.log(`服务器在${port}端口启动成功`)
