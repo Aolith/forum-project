@@ -10,7 +10,6 @@ export const useThemeStore=defineStore('theme',()=>{
 
   function toggleTheme() {
     theme.value = theme.value === 'light' ? 'dark' : 'light'
-    localStorage.setItem(STORAGE_KEY, theme.value)
   }
   
   return {theme,toggleTheme}
