@@ -12,6 +12,10 @@ const port=3001
 const postRouter=require('./router/posts')
 app.use('/api/posts',postRouter)
 
+//引入comment路由
+const commentRouter=require('./router/comments')
+app.use('/api/posts/:postId/comments',commentRouter)
+
 //在指定端口启动服务器
 app.listen(port,()=>{
   console.log(`服务器在${port}端口启动成功`)

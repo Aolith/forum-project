@@ -90,32 +90,49 @@ async function likesCount(id) {
 }
 
 //提交评论
-function addComment(id,newComment){
-  const found = posts.value.find(post => post.id===id);
-  if(found){
-    found.comments.push({
-      comment:newComment,
-      time:Date.now(),
-      id: Date.now() + '-' + Math.random()
+async function addComment(postId,newComment) {
+  try{
+    const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({comment:newComment})
     })
+    if(!res.ok)throw new Error('提交失败')
+    const data=await res.json()
+    posts.value=data
+  }catch(err){
+    console.error('提交评论失败',err)
   }
 }
+
+
 //删除评论
-function deleteComment(id,comtId){
-  const found = posts.value.find(post => post.id===id)
-  if(found){
-    found.comments=found.comments.filter(comments=>comments.id!==comtId)
-  }else{
-    console.warn
+async function deleteComment(postId,commentId) {
+  try{
+    const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments/${commentId}`,{
+      method:'DELETE'
+    })
+    if(!res.ok)throw new Error('删除失败')
+    const data=await res.json()
+    posts.value=data
+  }catch(err){
+    console.error('删除评论失败',err)
   }
 }
+
 //保存编辑评论
-function saveComment(id,commentText,comtId){
-  const post = posts.value.find(p => p.id===id)
-  if(!post)return
-  const comment=post.comments.find(c=>c.id===comtId)
-  if(comment){
-    comment.comment=commentText
+async function saveComment(postId,commentId,comment) {
+  try{
+    const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments/${commentId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({comment})
+    })
+    if(!res.ok)throw new Error('编辑失败')
+    const data=await res.json()
+    posts.value=data
+  }catch(err){
+    console.error('编辑评论失败',err)
   }
 }
 

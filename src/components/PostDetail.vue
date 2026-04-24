@@ -65,8 +65,8 @@ const pText=ref('')
     likesCount(post.value.id)
     //点赞组件
   }
-  function handleSaveComment(commentText,comtId) {
-      saveComment(post.value.id, commentText,comtId)        
+  function handleSaveComment(commentText, comtId) {
+      saveComment(post.value.id, comtId, commentText)        
       // 调用注入的 saveComment
   }
 </script>
