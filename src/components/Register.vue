@@ -51,6 +51,7 @@ async function handleRegister(){
           <li class="subRegister">
             <input type="submit" value="确认注册" class="btn">
           </li>
+          <li class="link"><p>没有账号,去<router-link to="/Login">登录</router-link></p></li>
         </ul>
       </form>
     </div>
@@ -93,14 +94,22 @@ async function handleRegister(){
   }
   .subRegister {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 10px;
   }
   .subRegister input {
     width: 80px;
-    height: 40px;
+    height: 30px;
     font-size: 18px;
     background-color: red;
     border: none;
     color: #fff;
+  }
+  .link {
+    margin-top: 5px;
+    text-align: center;
+    color: black;
+  }
+  .link a {
+    color: red;
   }
 </style>
