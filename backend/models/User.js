@@ -3,7 +3,8 @@ const mongoose=require('mongoose')
 const userSchema=new mongoose.Schema({
   sno:{
     type:String,
-    required:true
+    required:true,
+    unique: true  // 添加"主键"约束
   },
   password:{
     type:String,
