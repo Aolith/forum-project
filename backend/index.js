@@ -1,7 +1,14 @@
 //通过express搭建Web服务器
+require('dotenv').config()
 const express=require('express')
+const mongoose=require('mongoose')
 const cors = require('cors')
 const path=require('path')
+
+//连接MongoDB
+mongoose.connect(process.env.MONGO_URI)
+.then(() => console.log('MongoDB连接成功'))
+.catch(err => console.error('MongoDB连接失败', err))
 
 const app=express()
 app.use(cors())
