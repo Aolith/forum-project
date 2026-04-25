@@ -44,21 +44,6 @@ commentRouter.delete('/:commentId',async(req,res)=>{
 })
 
 //编辑评论
-/* commentRouter.put('/:commentId',(req,res)=>{
-  const commentId=parseInt(req.params.commentId)
-  const postId=parseInt(req.params.postId)
-  const {comment}=req.body
-  const indexPost=posts.findIndex(p=>p.id===postId)
-  if(indexPost===-1){
-    return res.status(404).json({error:'帖子不存在'})
-  }
-  const indexComt=posts[indexPost].comments.findIndex(p=>p.id===commentId)
-  if(indexComt===-1){
-    return res.status(404).json({error:'评论不存在'})
-  }
-  posts[indexPost].comments[indexComt].comment=comment
-  res.json(posts)
-}) */
 commentRouter.put('/:commentId',async(req,res)=>{
   try{
     const commentId=req.params.commentId
