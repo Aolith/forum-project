@@ -36,8 +36,8 @@ async function addPost(content) {
       body: JSON.stringify({ content })  // 只传 content，因为 title 后端固定
     })
     if (!res.ok) throw new Error('新增失败')
-    const data = await res.json()   // 后端返回整个新数组
-    posts.value = data             // 直接替换本地状态
+    const newPost=await res.json()
+    posts.value.push(newPost)
   } catch (err) {
     console.error('新增帖子失败：', err)
   }
@@ -51,8 +51,8 @@ async function deletePost(id){
       //delete无请求体
     })
     if(!res.ok)throw new Error('删除失败')
-    const data=await res.json()
-    posts.value=data
+    const deletedPost=await res.json()
+    posts.value=posts.value.filter(p=>p._id!==deletedPost._id)
   }catch(err){
     console.error('删除帖子失败',err)
   }
@@ -67,8 +67,8 @@ async function updatePosts(id,newContent){
       body:JSON.stringify({content:newContent})
     })
     if(!res.ok)throw new Error('编辑失败')
-    const data=await res.json()
-    posts.value=data
+    const updatedPost=await res.json()
+    posts.value=posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
     console.error('编辑帖子失败',err)
   }
@@ -82,8 +82,9 @@ async function likesCount(id) {
       headers:{'Content-Type':'application/json'}
     })
     if(!res.ok)throw new Error('点赞失败')
-    const data=await res.json()
-    posts.value=data
+    //记得加防抖锁
+    const updatedPost=await res.json()
+    posts.value=posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
     console.error('点赞帖子失败',err)
   }

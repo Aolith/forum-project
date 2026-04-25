@@ -5,7 +5,7 @@ const mongoose=require('mongoose')
 const cors = require('cors')
 const path=require('path')
 
-//连接MongoDB
+//连接MongoDB 
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('MongoDB连接成功'))
 .catch(err => console.error('MongoDB连接失败', err))
