@@ -99,8 +99,8 @@ async function addComment(postId,newComment) {
       body:JSON.stringify({comment:newComment})
     })
     if(!res.ok)throw new Error('提交失败')
-    const data=await res.json()
-    posts.value=data
+    const updatedPost = await res.json()
+    posts.value = posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
     console.error('提交评论失败',err)
   }
@@ -114,8 +114,8 @@ async function deleteComment(postId,commentId) {
       method:'DELETE'
     })
     if(!res.ok)throw new Error('删除失败')
-    const data=await res.json()
-    posts.value=data
+    const updatedPost = await res.json()
+    posts.value = posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
     console.error('删除评论失败',err)
   }
@@ -130,8 +130,8 @@ async function saveComment(postId,commentId,comment) {
       body:JSON.stringify({comment})
     })
     if(!res.ok)throw new Error('编辑失败')
-    const data=await res.json()
-    posts.value=data
+    const updatedPost = await res.json()
+    posts.value = posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
     console.error('编辑评论失败',err)
   }

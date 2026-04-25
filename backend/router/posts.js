@@ -1,7 +1,6 @@
 const express=require('express')
 const postRouter=express.Router()
 
-//引入数据const posts = require('../data/post')
 const Post=require('../models/Post')//引入数据库
 //get接口
 postRouter.get('/',async (req,res)=>{
@@ -10,7 +9,7 @@ postRouter.get('/',async (req,res)=>{
     res.json(posts)
   }catch(err){
     console.error('获取帖子失败',err)
-    res.status(500).json({err:'服务器内部错误'})
+    res.status(500).json({error:'服务器内部错误'})
   }
 })
 //添加新帖子
