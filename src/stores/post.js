@@ -3,28 +3,41 @@ import { ref,watch } from "vue";
 
 export const usePostsStore = defineStore('post', () => {
   const STORAGE_KEY = 'forum-posts'
-  const defaultPosts = [
-  { id: 1, title: '第一条帖子', content: '我终于要开始写论坛了！', likes: 0, comments: [] },
-  { id: 2, title: '第二条帖子', content: '有点激动呢！', likes: 0, comments: [] },
-  { id: 3, title: '第三条帖子', content: '我会加油！', likes: 0, comments: [] }
-  ]
-
-  let saved = null
+  const posts = ref([])  // 初始为空，不从缓存恢复
+// 初始化：从数据库拉取
+async function fetchPosts() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed)) {   // 关键：只有数组才用
-      saved = parsed
+    const res = await fetch('http://localhost:3001/api/posts');
+    if (!res.ok) throw new Error('获取帖子失败');
+    const data = await res.json();
+    posts.value = data;
+
+    // 注意：这里不手动写 localStorage，因为你下面的 watch 会自动同步
+  } catch (err) {
+    console.error('从数据库获取帖子失败，尝试降级到本地缓存:', err);
+
+    // 降级：读缓存
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) {
+      try {
+        posts.value = JSON.parse(cached);
+        console.log('已从本地缓存恢复数据');
+      } catch (parseErr) {
+        console.error('本地缓存数据损坏，恢复失败', parseErr);
+      }
+    } else {
+      console.warn('没有可用的本地缓存，首页为空');
     }
-  } catch (e) {
-    console.warn('localStorage 数据损坏，已忽略', e)
   }
-  const posts = ref(saved || defaultPosts)
+}
+
+// store 创建时立即调用一次，拉取数据库数据
+fetchPosts()
   
-  //添加watch
+  //watch持久化
   watch(posts, (newPosts) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newPosts))
-  }, { deep: true })
+  }, { deep: true }) 
 
 
   // 添加帖子的方法

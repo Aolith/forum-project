@@ -1,7 +1,7 @@
 //负责显示评论列表和每条评论的删除按钮,编辑按钮
 <script setup>
 import { ref } from 'vue';
-const editingId=ref(0)
+const editingId=ref(null)
 const editText=ref('')
 
 const props=defineProps(['comments'])  
@@ -26,8 +26,8 @@ function cancel(){
 </script>
 
 <template>
-  <div v-for="c in comments" :key="c.id">
-    <div v-if="c.id===editingId">
+  <div v-for="c in comments" :key="c._id">
+    <div v-if="c._id===editingId">
       <textarea  v-model="editText"></textarea>
       <button @click="save">保存</button>
       <button @click="cancel">取消</button>
@@ -35,8 +35,8 @@ function cancel(){
     <div v-else>
       <p>{{ c.comment }}</p>
       <p>{{ new Date(c.time).toLocaleString() }}</p>
-      <button @click="deletes(c.id)">删除评论</button>
-      <button @click="update(c.id,c.comment)">编辑评论</button>
+      <button @click="deletes(c._id)">删除评论</button>
+      <button @click="update(c._id,c.comment)">编辑评论</button>
     </div>
   </div>
 </template>

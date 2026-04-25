@@ -8,7 +8,10 @@ import LikeButton from './LikeButton.vue';
   const postsStore=usePostsStore()
   const route=useRoute()
   const router=useRouter()
-  const post = computed(() => postsStore.posts.find(p => p.id === Number(route.params.id)))
+  const post = computed(() => postsStore.posts.find(p => p._id === route.params.id))
+  // 在 <script setup> 里，computed 下面
+console.log('route.path:', route.path)
+console.log('route.params:', route.params)
   function goHome() {
     router.push('/')
   }
@@ -54,19 +57,20 @@ const pText=ref('')
   }
 //
   function handleSubmitComment(comment) {
-      addComment(post.value.id, comment)        
+    addComment(post.value._id, comment)      
       // 调用注入的 addComment
   }
   function handleDeleteComment(commentId) {
-      deleteComment(post.value.id, commentId) 
+    deleteComment(post.value._id, commentId)  
       // 调用注入的 deleteComment
   }
   function Like(){
-    likesCount(post.value.id)
+    likesCount(post.value._id)
     //点赞组件
   }
   function handleSaveComment(commentText, comtId) {
-      saveComment(post.value.id, comtId, commentText)        
+    saveComment(post.value._id, comtId, commentText)
+       
       // 调用注入的 saveComment
   }
 </script>
@@ -74,7 +78,7 @@ const pText=ref('')
 <template>
   <button @click="goHome">回到首页</button>
   <div v-if="post" class="post">
-      <div v-if="post.id==pId">
+      <div v-if="post._id == pId">
         <h2>{{ post.title }}</h2>
         <textarea v-model="pText"></textarea>
         <button @click="savePost">保存</button>
@@ -83,8 +87,8 @@ const pText=ref('')
       <div v-else>
         <h2>{{ post.title }}</h2>
         <p>{{ post.content }}</p>
-        <button @click="updates(post.id,post.content)">编辑帖子</button>
-        <button @click="deletes(post.id)">删除帖子</button>
+        <button @click="updates(post._id, post.content)">编辑帖子</button>
+        <button @click="deletes(post._id)">删除帖子</button>
         <LikeButton @like="Like" :likes="post.likes"/>
       </div>
       <div  class="comment" >

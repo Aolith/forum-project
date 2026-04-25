@@ -15,8 +15,8 @@ const totalComments = computed(() => {
     <p>欢迎来到我的第一个Vue项目!</p >
     <p>作者：凹里</p >
     <p>总评论数:{{ totalComments }}</p>
-    <div v-for="post in posts" :key="post.id" class="post">
-        <router-link :to="'/post/'+post.id" class="post-link">
+    <div v-for="post in posts" :key="post._id" class="post">
+        <router-link :to="'/post/'+post._id" class="post-link">
         <h2 >{{ post.title }}</h2>
         <p>评论数:{{ post.comments.length }}</p>
         <p class="likes">点赞数:{{ post.likes}}</p>
