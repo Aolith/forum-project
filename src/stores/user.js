@@ -4,18 +4,7 @@ import { ref, watch } from 'vue'
 export const useUserStore = defineStore('user', () => {
   const USER_KEY="forum-users"
   const CURRENT_USER_KEY = "forum-current-user"  // 新增
-  const defaultUsers=[
-    {sno: '6020240921', password: 'huhanyu62', name: '胡涵钰'},
-    {sno: '6020240950', password: 'congjiu55', name: '冯语涵'}
-  ]
-
-  let saved=null
-  try{
-    saved = JSON.parse(localStorage.getItem(USER_KEY))
-  }catch(e){
-    console.warn('Failed to parse users from localStorage', e)
-  }
-  const users = ref(saved || defaultUsers)
+  const users = ref([])
   //添加watch
   watch(users, (newUsers) => {
     localStorage.setItem(USER_KEY, JSON.stringify(newUsers))
