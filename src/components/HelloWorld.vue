@@ -18,6 +18,7 @@ const totalComments = computed(() => {
     <div v-for="post in posts" :key="post._id" class="post">
         <router-link :to="'/post/'+post._id" class="post-link">
         <h2 >{{ post.title }}</h2>
+        <p class="author">作者：{{ post.author?.name }}</p>
         <p>评论数:{{ post.comments.length }}</p>
         <p class="likes">点赞数:{{ post.likes}}</p>
         </router-link>
@@ -56,5 +57,8 @@ p {
 .post .likes {
   font-size: 14px;
   color: rgb(255, 89, 86);
+}
+.post .author{
+  color: #63a9e3;
 }
 </style>

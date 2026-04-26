@@ -5,7 +5,7 @@ const Post=require('../models/Post')//引入数据库
 //get接口
 postRouter.get('/',async (req,res)=>{
   try{
-    const posts=await Post.find()
+    const posts=await Post.find().populate('author', 'name')
     res.json(posts)
   }catch(err){
     console.error('获取帖子失败',err)
@@ -17,6 +17,7 @@ postRouter.post('/',async(req,res)=>{
   try{
     //从请求体拿到前端发来的数据
     const {content,title}=req.body
+    const authorId='69edd547f7e8ff407012d64c'//硬编码测试
     //简单检验
     if (!title) {
       return res.status(400).json({ error: '标题不能为空' })
@@ -29,11 +30,13 @@ postRouter.post('/',async(req,res)=>{
       //MongoDB 会自动为每条文档生成一个全局唯一的 _id 字段（类型是 ObjectId，不是数字）
       title,
       content,
+      author:authorId,
       likes:0,
       comments:[]
     }
     //增加数据文档
-    const createdPost= await Post.create(newPost)
+    let createdPost = await Post.create(newPost)
+    createdPost = await createdPost.populate('author', 'name')
     console.log('添加成功:', createdPost._id)
     res.status(201).json(createdPost)
   }catch(err){
