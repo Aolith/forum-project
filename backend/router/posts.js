@@ -16,15 +16,18 @@ postRouter.get('/',async (req,res)=>{
 postRouter.post('/',async(req,res)=>{
   try{
     //从请求体拿到前端发来的数据
-    const {content}=req.body
+    const {content,title}=req.body
     //简单检验
+    if (!title) {
+      return res.status(400).json({ error: '标题不能为空' })
+    }
     if (!content) {
       return res.status(400).json({ error: '内容不能为空' })
     }
     //构造新帖子对象
     const newPost={
       //MongoDB 会自动为每条文档生成一个全局唯一的 _id 字段（类型是 ObjectId，不是数字）
-      title:'新帖子',
+      title,
       content,
       likes:0,
       comments:[]

@@ -41,12 +41,12 @@ fetchPosts()
 
 
   // 添加帖子的方法
-async function addPost(content) {
+async function addPost(content,title) {
   try {
     const res = await fetch('http://localhost:3001/api/posts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content })  // 只传 content，因为 title 后端固定
+      body: JSON.stringify({ content,title })  // 只传 content，因为 title 后端固定
     })
     if (!res.ok) throw new Error('新增失败')
     const newPost=await res.json()

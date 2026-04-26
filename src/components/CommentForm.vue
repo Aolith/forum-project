@@ -4,10 +4,13 @@ const props=defineProps(['modelValue'])
 const emit= defineEmits(['submit-comment','update:modelValue'])
 
 function submit(){
-    if(props.modelValue.trim()){
-      emit('submit-comment',props.modelValue)
-    }
+  if(props.modelValue.trim()){
+    emit('submit-comment', props.modelValue)
+    emit('update:modelValue', '')  // 清空父组件绑定的 v-model 值
+  }else{
+    alert('内容不能为空!')
   }
+}
 </script>
 
 <template>
