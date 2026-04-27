@@ -6,6 +6,11 @@ const commentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  author:{
+    type: mongoose.Schema.Types.ObjectId,  // 存储用户的 _id
+    ref: 'User',        // 指向 users 集合
+    //required: true 做完JWT之后补上
+  },
   time: {
     type: Date,
     default: Date.now//不能加括号

@@ -137,10 +137,17 @@ async function addComment(postId,newComment) {
   try{
     const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments`,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      },
       body:JSON.stringify({comment:newComment})
     })
-    if(!res.ok)throw new Error('提交失败')
+    if (!res.ok) {
+      const errorData = await res.json()
+      console.error('后端报错：', errorData.error)
+      throw new Error(errorData.error || '提交失败')
+    }
     const updatedPost = await res.json()
     posts.value = posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
@@ -153,9 +160,17 @@ async function addComment(postId,newComment) {
 async function deleteComment(postId,commentId) {
   try{
     const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments/${commentId}`,{
-      method:'DELETE'
+      method:'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      }
     })
-    if(!res.ok)throw new Error('删除失败')
+    if (!res.ok) {
+      const errorData = await res.json()
+      console.error('后端报错：', errorData.error)
+      throw new Error(errorData.error || '删除失败')
+    }
     const updatedPost = await res.json()
     posts.value = posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
@@ -168,10 +183,17 @@ async function saveComment(postId,commentId,comment) {
   try{
     const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments/${commentId}`,{
       method:'PUT',
-      headers:{'Content-Type':'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      },
       body:JSON.stringify({comment})
     })
-    if(!res.ok)throw new Error('编辑失败')
+    if (!res.ok) {
+      const errorData = await res.json()
+      console.error('后端报错：', errorData.error)
+      throw new Error(errorData.error || '编辑失败')
+    }
     const updatedPost = await res.json()
     posts.value = posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
