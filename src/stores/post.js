@@ -7,7 +7,7 @@ export const usePostsStore = defineStore('post', () => {
 // 初始化：从数据库拉取
 async function fetchPosts() {
   try {
-    const res = await fetch('http://localhost:3001/api/posts');
+    const res = await fetch('https://forum-project-production.up.railway.app/api/posts');
     if (!res.ok) throw new Error('获取帖子失败');
     const data = await res.json();
     posts.value = data;
@@ -43,7 +43,7 @@ fetchPosts()
   // 添加帖子的方法
 async function addPost(content,title) {
   try {
-    const res = await fetch('http://localhost:3001/api/posts', {
+    const res = await fetch('https://forum-project-production.up.railway.app/api/posts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ async function addPost(content,title) {
   //删除帖子
 async function deletePost(id){
   try{
-    const res=await fetch(`http://localhost:3001/api/posts/${id}`,{
+    const res=await fetch(`https://forum-project-production.up.railway.app/api/posts/${id}`,{
       method:'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ async function deletePost(id){
 //编辑帖子
 async function updatePosts(id,newContent){
   try{
-    const res=await fetch(`http://localhost:3001/api/posts/${id}`,{
+    const res=await fetch(`https://forum-project-production.up.railway.app/api/posts/${id}`,{
       method:'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ async function updatePosts(id,newContent){
 //点赞帖子
 async function likesCount(id) {
   try{
-    const res=await fetch(`http://localhost:3001/api/posts/${id}/likes`,{
+    const res=await fetch(`https://forum-project-production.up.railway.app/api/posts/${id}/likes`,{
       method:'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ async function likesCount(id) {
 //提交评论
 async function addComment(postId,newComment) {
   try{
-    const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments`,{
+    const res=await fetch(`https://forum-project-production.up.railway.app/api/posts/${postId}/comments`,{
       method:'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ async function addComment(postId,newComment) {
 //删除评论
 async function deleteComment(postId,commentId) {
   try{
-    const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments/${commentId}`,{
+    const res=await fetch(`https://forum-project-production.up.railway.app/api/posts/${postId}/comments/${commentId}`,{
       method:'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -181,7 +181,7 @@ async function deleteComment(postId,commentId) {
 //保存编辑评论
 async function saveComment(postId,commentId,comment) {
   try{
-    const res=await fetch(`http://localhost:3001/api/posts/${postId}/comments/${commentId}`,{
+    const res=await fetch(`https://forum-project-production.up.railway.app/api/posts/${postId}/comments/${commentId}`,{
       method:'PUT',
       headers: {
         'Content-Type': 'application/json',

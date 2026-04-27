@@ -30,7 +30,7 @@ export const useUserStore = defineStore('user', () => {
 //用户登录
 async function userLogin(snoId,numId){
   try{
-    const res=await fetch('http://localhost:3001/api/users/login',{
+    const res=await fetch('https://forum-project-production.up.railway.app/api/users/login',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({sno:snoId,password:numId})
@@ -53,7 +53,7 @@ async function userLogin(snoId,numId){
 //添加新用户(注册)
 async function addUser(nameId,snoId,numId) {
   try{
-    const res=await fetch('http://localhost:3001/api/users/register',{
+    const res=await fetch('https://forum-project-production.up.railway.app/api/users/register',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({sno:snoId,password:numId,name:nameId})
