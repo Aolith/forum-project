@@ -46,13 +46,19 @@ postRouter.post('/',auth,async(req,res)=>{
 })
 
 //删除帖子
-postRouter.delete('/:id',async(req,res)=>{
+postRouter.delete('/:id',auth,async(req,res)=>{
   try{
     const id = req.params.id
-    const deletedPost= await Post.findByIdAndDelete(id)
-    if(!deletedPost){
+    const post=await Post.findById(id)
+    if(!post){
       return res.status(404).json({ error: '帖子不存在' })
     }
+    //身份认证
+    const user=req.user._id//从 token 里拿的当前用户 _id
+    if(post.author.toString()!==user){
+      return res.status(403).json({error:'只能删除自己的帖子'})
+    }
+    const deletedPost= await Post.findByIdAndDelete(id)
     res.json(deletedPost)
   }catch(err){
     console.error('删除帖子失败',err)
@@ -61,9 +67,18 @@ postRouter.delete('/:id',async(req,res)=>{
 })
 
 //编辑帖子
-postRouter.put('/:id',async(req,res)=>{
+postRouter.put('/:id',auth,async(req,res)=>{
   try{
     const id=req.params.id
+    const post=await Post.findById(id)
+    if(!post){
+      return res.status(404).json({ error: '帖子不存在' })
+    }
+    //身份认证
+    const user=req.user._id//从 token 里拿的当前用户 _id
+    if(post.author.toString()!==user){
+      return res.status(403).json({error:'只能编辑自己的帖子'})
+    }
     const {content}=req.body
     if (content === undefined) {
       return res.status(400).json({ error: '内容不能为空' })
@@ -73,9 +88,6 @@ postRouter.put('/:id',async(req,res)=>{
       {content},
       {new:true}
     )
-    if(!updatedPost){
-      return res.status(404).json({ error: '帖子不存在' })
-    }
     res.json(updatedPost)
   }catch(err){
     console.error('编辑帖子失败',err)
@@ -84,18 +96,24 @@ postRouter.put('/:id',async(req,res)=>{
 })
 
 //点赞帖子
-postRouter.put('/:id/likes',async(req,res)=>{
+postRouter.put('/:id/likes',auth,async(req,res)=>{
   try{
     const id=req.params.id
-    const updatedPost=await Post.findByIdAndUpdate(
-      id,
-      { $inc: { likes: 1 } },
-      {new:true}
-    )
-    if(!updatedPost){
+    const post=await Post.findById(id)
+    if(!post){
       return res.status(404).json({ error: '帖子不存在' })
     }
-    res.json(updatedPost)
+    //身份认证
+    const user=req.user._id//从 token 里拿的当前用户 _id
+    //防重复
+    if(post.likedBy.includes(user)){
+      return res.status(400).json({error:'你已经点过赞了'})
+    }
+    // 找到帖子 → 操作内存中的文档 → 整体保存
+    post.likes += 1
+    post.likedBy.push(req.user._id)
+    await post.save()
+    return res.json(post)
   }catch(err){
     console.error('点赞帖子失败',err)
     res.status(500).json({error:'服务器内部错误'})

@@ -31,6 +31,8 @@ const postSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // 新增：记录点赞用户的 _id
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [commentSchema]  // 这里引用上面定义的评论 Schema
 }, {
   timestamps: true  // 自动添加 createdAt 和 updatedAt 字段

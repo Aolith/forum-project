@@ -51,7 +51,11 @@ async function addPost(content,title) {
       },
       body: JSON.stringify({ content,title })  // 只传 content，因为 title 后端固定
     })
-    if (!res.ok) throw new Error('新增失败')
+    if (!res.ok) {
+      const errorData = await res.json()
+      console.error('后端报错：', errorData.error)
+      throw new Error(errorData.error || '新增失败')
+    }
     const newPost=await res.json()
     posts.value.push(newPost)
   } catch (err) {
@@ -64,9 +68,17 @@ async function deletePost(id){
   try{
     const res=await fetch(`http://localhost:3001/api/posts/${id}`,{
       method:'DELETE',
-      //delete无请求体
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      }
+      //delete没有请求体
     })
-    if(!res.ok)throw new Error('删除失败')
+    if (!res.ok) {
+      const errorData = await res.json()
+      console.error('后端报错：', errorData.error)
+      throw new Error(errorData.error || '删除失败')
+    }
     const deletedPost=await res.json()
     posts.value=posts.value.filter(p=>p._id!==deletedPost._id)
   }catch(err){
@@ -79,10 +91,17 @@ async function updatePosts(id,newContent){
   try{
     const res=await fetch(`http://localhost:3001/api/posts/${id}`,{
       method:'PUT',
-      headers:{'Content-Type':'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      },
       body:JSON.stringify({content:newContent})
     })
-    if(!res.ok)throw new Error('编辑失败')
+    if (!res.ok) {
+      const errorData = await res.json()
+      console.error('后端报错：', errorData.error)
+      throw new Error(errorData.error || '编辑失败')
+    }
     const updatedPost=await res.json()
     posts.value=posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
@@ -95,9 +114,16 @@ async function likesCount(id) {
   try{
     const res=await fetch(`http://localhost:3001/api/posts/${id}/likes`,{
       method:'PUT',
-      headers:{'Content-Type':'application/json'}
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      }
     })
-    if(!res.ok)throw new Error('点赞失败')
+    if (!res.ok) {
+      const errorData = await res.json()
+      console.error('后端报错：', errorData.error)
+      throw new Error(errorData.error || '点赞失败')
+    }
     //记得加防抖锁
     const updatedPost=await res.json()
     posts.value=posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
