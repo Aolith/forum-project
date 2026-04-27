@@ -1,6 +1,7 @@
 const express=require('express')
 const userRouter=express.Router()
 const bcrypt = require('bcryptjs')//引入哈希
+const jwt=require('jsonwebtoken')
 
 //引入数据库
 const User = require('../models/User')
@@ -24,7 +25,13 @@ userRouter.post('/login',async(req,res)=>{
     }
     //登录成功
     const { password: _, ...safeUser } = user.toObject()// Mongoose 文档需要 .toObject() 才能解构 
-    res.json({ user: safeUser })
+    //生成token
+    const token=jwt.sign(
+      {sno:user.sno,_id:user._id},// 把用户信息编码进 token
+      process.env.JWT_SECRET, // 用密钥加密
+      {expiresIn:'7d'}// token 7 天后过期
+    )
+    res.json({ user: safeUser,token })// 返回 token 给前端
   }catch(err){
     console.error('登录失败',err)
     res.status(500).json({error:'服务器内部错误'})

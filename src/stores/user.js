@@ -41,6 +41,8 @@ async function userLogin(snoId,numId){
     }
     const data=await res.json()
     currentUser.value=data.user
+    // 存储 token 到 localStorage
+    localStorage.setItem('forum-token', data.token)
     return { success: true, msg: '' }
   }catch(err){
     console.error('用户登录失败',err)
@@ -71,6 +73,7 @@ async function addUser(nameId,snoId,numId) {
   function logout() {
     if(confirm("确认退出登录吗?")){
       currentUser.value = null
+      localStorage.removeItem('forum-token')
     }
   }
 
