@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import HelloWorld from '../components/HelloWorld.vue'
+import HomeView from '../views/HomeView.vue'
 import About from '../components/about.vue'
 import Login from '@/components/Login.vue'
 import Register from '@/components/Register.vue'
 const routes = [
-  { path: '/', component: HelloWorld, meta: { requiresAuth: true }},
+  { path: '/', component: HomeView, meta: { requiresAuth: true }},
   { path: '/about', component: About, meta: { requiresAuth: true }},
   { path: '/Login',component:Login},
   { path: '/Register',component:Register},
