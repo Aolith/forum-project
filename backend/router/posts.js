@@ -1,5 +1,6 @@
 const express=require('express')
 const postRouter=express.Router()
+const auth = require('../middleware/auth')
 
 const Post=require('../models/Post')//引入数据库
 //get接口
@@ -13,11 +14,10 @@ postRouter.get('/',async (req,res)=>{
   }
 })
 //添加新帖子
-postRouter.post('/',async(req,res)=>{
+postRouter.post('/',auth,async(req,res)=>{
   try{
     //从请求体拿到前端发来的数据
     const {content,title}=req.body
-    const authorId='69edd547f7e8ff407012d64c'//硬编码测试
     //简单检验
     if (!title) {
       return res.status(400).json({ error: '标题不能为空' })
@@ -30,7 +30,7 @@ postRouter.post('/',async(req,res)=>{
       //MongoDB 会自动为每条文档生成一个全局唯一的 _id 字段（类型是 ObjectId，不是数字）
       title,
       content,
-      author:authorId,
+      author:req.user._id,//从 token 里拿的当前用户 _id
       likes:0,
       comments:[]
     }

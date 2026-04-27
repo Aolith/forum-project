@@ -45,7 +45,10 @@ async function addPost(content,title) {
   try {
     const res = await fetch('http://localhost:3001/api/posts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      },
       body: JSON.stringify({ content,title })  // 只传 content，因为 title 后端固定
     })
     if (!res.ok) throw new Error('新增失败')
