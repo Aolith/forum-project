@@ -18,6 +18,11 @@ commentRouter.post('/',auth,async(req,res)=>{
       author:req.user._id,
     })
     await post.save()
+
+     // 填充帖子作者和评论作者
+    await post.populate('author', 'name')
+    await post.populate('comments.author', 'name')
+
     res.status(201).json(post)//返回整个帖子
   }catch(err){
     console.error('新增评论失败',err)

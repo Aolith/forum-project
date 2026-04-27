@@ -6,7 +6,9 @@ const Post=require('../models/Post')//引入数据库
 //get接口
 postRouter.get('/',async (req,res)=>{
   try{
-    const posts=await Post.find().populate('author', 'name')
+    const posts=await Post.find()
+      .populate('author', 'name')
+      .populate('comments.author', 'name')
     res.json(posts)
   }catch(err){
     console.error('获取帖子失败',err)

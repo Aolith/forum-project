@@ -22,6 +22,7 @@ function save(){
 }
 function cancel(){
   editingId.value = null
+  editText.value = ''
 }
 </script>
 
@@ -33,6 +34,7 @@ function cancel(){
       <button @click="cancel">取消</button>
     </div>
     <div v-else>
+      <p>{{ c.author?.name}}</p>
       <p>{{ c.comment }}</p>
       <p>{{ new Date(c.time).toLocaleString() }}</p>
       <button @click="deletes(c._id)">删除评论</button>
