@@ -31,7 +31,7 @@ async function handleLogin() {
         <input
           v-model="snoId"
           type="text"
-          placeholder="用户名"
+          placeholder="学号"
           class="auth-input"
           autocomplete="username"
         >
