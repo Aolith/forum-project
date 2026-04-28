@@ -1,0 +1,80 @@
+/* ============================================
+   校园论坛 - 全局样式基座
+   设计定义：胡涵钰
+   风格：圆润可爱风 / 轻柔阴影 / 清新蓝
+   ============================================ */
+
+/* 1. CSS 变量（设计令牌） */
+:root {
+  /* 色板 */
+  --color-primary: #76aff5;
+  --color-primary-light: #a4cbf8;  /* 悬停态 */
+  --color-primary-dark: #4a8fd4;   /* 点击态 */
+  --color-bg: #f8fafc;             /* 页面背景 */
+  --color-surface: #ffffff;        /* 卡片背景 */
+  --color-text: #1e293b;           /* 正文 */
+  --color-text-secondary: #64748b; /* 小字提示 */
+  --color-border: #e2e8f0;         /* 分割线 */
+
+  /* 字体层级 */
+  --font-size-title: 16px;
+  --font-size-body: 14px;
+  --font-size-small: 12px;
+
+  /* 圆角（圆润可爱风） */
+  --radius-sm: 8px;   /* 按钮、标签 */
+  --radius-md: 12px;  /* 卡片 */
+  --radius-lg: 16px;  /* 弹窗 */
+
+  /* 阴影（轻柔哲学 - 只用y轴偏移，弱化扩散） */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  /* 间距 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+
+  /* 过渡 */
+  --transition-fast: 150ms ease;
+}
+
+/* 2. 暗色模式覆盖 */
+[data-theme="dark"] {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-border: #334155;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 3. 基础重置 & 全局排版 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.6;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
