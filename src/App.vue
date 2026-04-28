@@ -23,40 +23,53 @@ const userStore=useUserStore()
 </script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-}
-#app, .light, .dark {  /* 假设你的根 div 有这些类 */
-  min-height: 100vh;    /* 视口高度的 100% */
-}
-.light {
-  background-color: white;
-  color: black;
-}
-.dark {
-  background-color: black;
-  color: white;
-}
+/* 导航栏容器：居中 + 与首页同宽 */
 nav {
-  padding: 10px;
-  background: transparent;
-  margin-bottom: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-lg);
+  background-color: transparent;
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
 }
+
+nav div {
+  display: inline-block;
+}
+
 nav a {
   margin-right: 15px;
   text-decoration: none;
-  color: #333;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  transition: color var(--transition-fast);
 }
+
+nav a:hover {
+  color: var(--color-primary);
+}
+
 nav a.router-link-active {
   font-weight: bold;
-  color: #42b983;
+  color: var(--color-primary);
 }
+
 nav button {
   margin-left: 10px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
-nav div {
-  display: inline-block;
 
+nav button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 </style>
