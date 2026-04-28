@@ -55,10 +55,12 @@ postRouter.delete('/:id',auth,async(req,res)=>{
     if(!post){
       return res.status(404).json({ error: '帖子不存在' })
     }
-    //身份认证
-    const user=req.user._id//从 token 里拿的当前用户 _id
-    if(post.author.toString()!==user){
-      return res.status(403).json({error:'只能删除自己的帖子'})
+    // 如果帖子有作者信息，进行权限验证；没有作者信息的旧帖子直接允许删除
+    if (post.author) {
+      const user = req.user._id
+      if (post.author.toString() !== user) {
+        return res.status(403).json({ error: '只能删除自己的帖子' })
+      }
     }
     const deletedPost= await Post.findByIdAndDelete(id)
     res.json(deletedPost)
