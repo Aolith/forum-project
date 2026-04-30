@@ -1,12 +1,29 @@
 <script setup> 
-import { computed } from 'vue' 
+import { computed, onMounted, onUnmounted } from 'vue' 
 import { usePostsStore } from '@/stores/post'
+import { throttle } from '@/utils/throttle'
 const postsStore=usePostsStore()
 const posts=postsStore.posts
 const totalComments = computed(() => {
   return posts.length
 })
 
+//创建节流后的滚动处理函数
+const handleScroll = throttle(() => {
+  const{scrollTop,scrollHeight,clientHeight}=document.documentElement
+
+  //距离底部 50px 时触发加载更多
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    postsStore.loadMorePosts()
+  }
+},1000)
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script> 
 
 <template>

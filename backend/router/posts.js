@@ -6,9 +6,18 @@ const Post=require('../models/Post')//引入数据库
 //get接口
 postRouter.get('/',async (req,res)=>{
   try{
+    // 从查询参数中获取分页信息，设置默认值
+    const page = parseInt(req.query.page) || 1     // 当前页码，默认第 1 页
+    const limit = parseInt(req.query.limit) || 10  // 每页数量，默认 10 条
+    const skip = (page - 1) * limit                // 跳过的文档数
+
     const posts=await Post.find()
       .populate('author', 'name')
       .populate('comments.author', 'name')
+      .sort({ createdAt: -1 })// 按创建时间倒序，最新的在前面
+      .skip(skip)
+      .limit(limit)
+
     res.json(posts)
   }catch(err){
     console.error('获取帖子失败',err)

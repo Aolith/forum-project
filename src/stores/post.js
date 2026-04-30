@@ -109,8 +109,13 @@ async function updatePosts(id,newContent){
   }
 }
 
+let isLiking = false; // 防抖锁，定义在 store 外面，被 likesCount 闭包
 //点赞帖子
 async function likesCount(id) {
+  //如果正在点赞中，直接返回，不执行后续请求
+  if(isLiking)return
+
+  isLiking=true//上锁
   try{
     const res=await fetch(`https://forum-project-production.up.railway.app/api/posts/${id}/likes`,{
       method:'PUT',
@@ -124,11 +129,13 @@ async function likesCount(id) {
       console.error('后端报错：', errorData.error)
       throw new Error(errorData.error || '点赞失败')
     }
-    //记得加防抖锁
     const updatedPost=await res.json()
     posts.value=posts.value.map(p => p._id === updatedPost._id ? updatedPost : p)
   }catch(err){
     console.error('点赞帖子失败',err)
+  }
+  finally{
+    isLiking=false//解锁
   }
 }
 
@@ -201,5 +208,27 @@ async function saveComment(postId,commentId,comment) {
   }
 }
 
-  return { posts,addPost,deletePost,likesCount,updatePosts,addComment,deleteComment,saveComment }
+// 分页加载更多帖子
+let currentPage = 1
+
+async function loadMorePosts() {
+  currentPage++
+  try {
+    const res = await fetch(`/api/posts?page=${currentPage}&limit=10`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      }
+    })
+    if (!res.ok) throw new Error('加载更多帖子失败')
+    const newPosts = await res.json()
+    // 追加新数据，不覆盖已有数据
+    posts.value.push(...newPosts)
+  } catch (err) {
+    console.error('加载更多帖子失败', err)
+    currentPage--  // 失败时回滚页码
+  }
+}
+
+
+  return { posts,addPost,deletePost,likesCount,updatePosts,addComment,deleteComment,saveComment,loadMorePosts }
 })
