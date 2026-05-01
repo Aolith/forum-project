@@ -4,6 +4,10 @@
 
 在线可访问：https://www.aoliforum.me/
 
+## 项目演示
+
+<video src="演示视频.mp4" controls width="100%"></video>
+
 核心功能
 
 · 帖子管理：发布帖子（标题+内容）、编辑、删除、点赞
