@@ -3,10 +3,13 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { usePostsStore } from '@/stores/post'
 import { throttle } from '@/utils/throttle'
 const postsStore=usePostsStore()
-const posts=postsStore.posts
+
 const totalComments = computed(() => {
-  return posts.length
+  return postsStore.posts.length
 })
+
+
+
 
 //创建节流后的滚动处理函数
 const handleScroll = throttle(() => {
@@ -30,7 +33,7 @@ onUnmounted(() => {
   <div class="home-container">
     <h1>校园论坛</h1>
     <p>总帖子数:{{ totalComments }}</p>
-    <div v-for="post in posts" :key="post._id" class="post">
+    <div  v-for="post in postsStore.posts" :key="post._id" class="post">
       <router-link :to="'/post/' + post._id" class="post-link">
         <h2>{{ post.title }}</h2>
         <p class="likes">👍 {{ post.likes }}</p>
