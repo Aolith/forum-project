@@ -5,8 +5,7 @@
 在线可访问：https://www.aoliforum.me/
 
 ## 项目演示
-
-<video src="./演示视频.mp4" controls width="100%"></video>
+[🎬 点击观看项目演示视频（B站）](https://b23.tv/zKxNJgK)
 
 核心功能
 
