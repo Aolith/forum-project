@@ -1,21 +1,21 @@
 <script setup>
-import { useUserStore } from '@/stores/user'
-import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { useUserStore } from "@/stores/user"
+import { useRouter } from "vue-router"
+import { ref } from "vue"
 
 const router = useRouter()
 const userStore = useUserStore()
-const snoId = ref('')
-const numId = ref('')
+const snoId = ref("")
+const numId = ref("")
 
 async function handleLogin() {
   if (!snoId.value || !numId.value) {
-    alert('用户名和密码不能为空!')
+    alert("用户名和密码不能为空!")
     return
   }
   const result = await userStore.userLogin(snoId.value, numId.value)
   if (result.success) {
-    router.push('/')
+    router.push("/")
   } else {
     alert(result.msg)
   }
@@ -34,20 +34,18 @@ async function handleLogin() {
           placeholder="学号"
           class="auth-input"
           autocomplete="username"
-        >
+        />
         <input
           v-model="numId"
           type="password"
           placeholder="密码"
           class="auth-input"
           autocomplete="current-password"
-        >
+        />
         <button type="submit" class="btn-submit">确认登录</button>
       </form>
 
-      <p class="auth-link">
-        没有账号？<router-link to="/Register">去注册</router-link>
-      </p>
+      <p class="auth-link">没有账号？<router-link to="/Register">去注册</router-link></p>
     </div>
   </div>
 </template>

@@ -1,39 +1,36 @@
-<script setup> 
-import { computed, onMounted, onUnmounted } from 'vue' 
-import { usePostsStore } from '@/stores/post'
-import { throttle } from '@/utils/throttle'
-const postsStore=usePostsStore()
+<script setup>
+import { computed, onMounted, onUnmounted } from "vue"
+import { usePostsStore } from "@/stores/post"
+import { throttle } from "@/utils/throttle"
+const postsStore = usePostsStore()
 
 const totalComments = computed(() => {
   return postsStore.posts.length
 })
 
-
-
-
 //创建节流后的滚动处理函数
 const handleScroll = throttle(() => {
-  const{scrollTop,scrollHeight,clientHeight}=document.documentElement
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement
 
   //距离底部 50px 时触发加载更多
   if (scrollTop + clientHeight >= scrollHeight - 50) {
     postsStore.loadMorePosts()
   }
-},1000)
+}, 1000)
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
+  window.addEventListener("scroll", handleScroll)
 })
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener("scroll", handleScroll)
 })
-</script> 
+</script>
 
 <template>
   <div class="home-container">
     <h1>校园论坛</h1>
     <p>总帖子数:{{ totalComments }}</p>
-    <div  v-for="post in postsStore.posts" :key="post._id" class="post">
+    <div v-for="post in postsStore.posts" :key="post._id" class="post">
       <router-link :to="'/post/' + post._id" class="post-link">
         <h2>{{ post.title }}</h2>
         <p class="likes">👍 {{ post.likes }}</p>
@@ -49,8 +46,8 @@ onUnmounted(() => {
   max-width: 1000px;
   margin: 0 auto;
   padding: var(--space-lg);
-  background-color: var(--color-primary-light);  /* 追加这一行 */
-  border-radius: var(--radius-lg);               /* 给大盒子也加圆角，与卡片风格统一 */
+  background-color: var(--color-primary-light); /* 追加这一行 */
+  border-radius: var(--radius-lg); /* 给大盒子也加圆角，与卡片风格统一 */
 }
 
 /* 页面标题区 */
@@ -69,7 +66,7 @@ p {
 
 /* -------------------- 帖子卡片 -------------------- */
 .post {
-  background-color: var(--color-surface);  /* 白色，不动 */
+  background-color: var(--color-surface); /* 白色，不动 */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-md);
@@ -85,7 +82,7 @@ p {
 .post h2 {
   text-align: center;
   font-size: 22px;
-  color: var(--color-primary);        /* 确保用主色 */
+  color: var(--color-primary); /* 确保用主色 */
   margin-bottom: var(--space-xs);
 }
 
@@ -116,6 +113,6 @@ p {
 .post-link {
   text-decoration: none;
   color: inherit;
-  display: block;                                 /* 让整个卡片可点击 */
+  display: block; /* 让整个卡片可点击 */
 }
 </style>

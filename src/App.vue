@@ -1,8 +1,8 @@
 <template>
-  <div :class="themeStore.theme" style="min-height: 100vh;">
+  <div :class="themeStore.theme" style="min-height: 100vh">
     <nav v-if="!$route.meta.hideNav">
       <div v-if="!userStore.currentUser">
-        <router-link to="/Login"></router-link> 
+        <router-link to="/Login"></router-link>
       </div>
       <div v-else>
         <router-link to="/">论坛首页</router-link>
@@ -16,10 +16,10 @@
 </template>
 
 <script setup>
-import { useThemeStore } from '@/stores/theme'
-import { useUserStore } from './stores/user';
-const themeStore=useThemeStore()
-const userStore=useUserStore()
+import { useThemeStore } from "@/stores/theme"
+import { useUserStore } from "./stores/user"
+const themeStore = useThemeStore()
+const userStore = useUserStore()
 </script>
 
 <style>

@@ -1,15 +1,15 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue"
 
 const editingId = ref(null)
-const editText = ref('')
+const editText = ref("")
 
 const props = defineProps({
   comments: Array,
-  postAuthorId: String,      // 帖主ID
-  currentUserId: String       // 当前登录用户ID
+  postAuthorId: String, // 帖主ID
+  currentUserId: String, // 当前登录用户ID
 })
-const emit = defineEmits(['delete-comment', 'save-comment'])
+const emit = defineEmits(["delete-comment", "save-comment"])
 
 // 权限判断
 function canEdit(comment) {
@@ -23,12 +23,12 @@ function canDelete(comment) {
 // 格式化时间（简化为“4月28日 14:30”）
 function formatTime(time) {
   const d = new Date(time)
-  return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`
 }
 
 function deletes(comtId) {
   if (confirm("确定要删除这条评论吗？")) {
-    emit('delete-comment', comtId)
+    emit("delete-comment", comtId)
   }
 }
 
@@ -38,20 +38,19 @@ function update(comtId, comment) {
 }
 
 function save() {
-  emit('save-comment', editText.value, editingId.value)
-  editText.value = ''
+  emit("save-comment", editText.value, editingId.value)
+  editText.value = ""
   editingId.value = null
 }
 
 function cancel() {
   editingId.value = null
-  editText.value = ''
+  editText.value = ""
 }
 </script>
 
 <template>
   <div v-for="c in comments" :key="c._id" class="comment-card">
-
     <!-- 内联编辑模式 -->
     <div v-if="c._id === editingId" class="comment-edit">
       <textarea v-model="editText" class="comment-textarea"></textarea>
@@ -68,8 +67,12 @@ function cancel() {
         <span class="comment-author">{{ c.author?.name }}</span>
         <span class="comment-time">{{ formatTime(c.time) }}</span>
         <div class="comment-actions">
-          <button v-if="canEdit(c)" @click="update(c._id, c.comment)" class="btn-sm btn-edit">编辑</button>
-          <button v-if="canDelete(c)" @click="deletes(c._id)" class="btn-sm btn-delete">删除</button>
+          <button v-if="canEdit(c)" @click="update(c._id, c.comment)" class="btn-sm btn-edit">
+            编辑
+          </button>
+          <button v-if="canDelete(c)" @click="deletes(c._id)" class="btn-sm btn-delete">
+            删除
+          </button>
         </div>
       </div>
     </div>
@@ -116,7 +119,7 @@ function cancel() {
 .comment-time {
   font-size: 12px;
   color: var(--color-text-secondary);
-  margin-right: auto;        /* 把按钮推到右侧 */
+  margin-right: auto; /* 把按钮推到右侧 */
   opacity: 0.7;
 }
 

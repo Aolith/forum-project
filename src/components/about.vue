@@ -1,27 +1,27 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue"
 
-import { usePostsStore } from '@/stores/post'
-const postsStore=usePostsStore()
+import { usePostsStore } from "@/stores/post"
+const postsStore = usePostsStore()
 
-const title = ref('')
-const content = ref('')
+const title = ref("")
+const content = ref("")
 
 function submit() {
-  if (content.value.trim()&& title.value.trim()) {
+  if (content.value.trim() && title.value.trim()) {
     // 触发 addPost 事件，把输入内容传出去
-    postsStore.addPost(content.value,title.value)
-    content.value = '' // 清空输入框
-    title.value=''
+    postsStore.addPost(content.value, title.value)
+    content.value = "" // 清空输入框
+    title.value = ""
   } else {
-    alert('内容不能为空')
+    alert("内容不能为空")
   }
 }
 
 function reset() {
-  if (confirm('确定清空吗？')) {
-    content.value = ''
-    title.value=''
+  if (confirm("确定清空吗？")) {
+    content.value = ""
+    title.value = ""
   }
 }
 </script>
@@ -30,7 +30,7 @@ function reset() {
   <div class="write-post">
     <div class="form-card">
       <label class="form-label">帖子标题</label>
-      <input v-model="title" class="title-input" placeholder="起个吸引人的标题吧...">
+      <input v-model="title" class="title-input" placeholder="起个吸引人的标题吧..." />
 
       <label class="form-label">帖子内容</label>
       <textarea v-model="content" class="content-input" placeholder="分享你的想法..."></textarea>

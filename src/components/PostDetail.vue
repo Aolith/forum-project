@@ -1,86 +1,90 @@
 <script setup>
-import CommentForm from './CommentForm.vue'
-import CommentList from './CommentList.vue'
-import LikeButton from './LikeButton.vue';
-  import { computed,watch,ref} from 'vue';
-  import { useRoute,useRouter } from 'vue-router';
-  import { usePostsStore } from '@/stores/post'
-  import { useUserStore } from '@/stores/user'
-  const userStore = useUserStore()
-  const postsStore=usePostsStore()
-  const route=useRoute()
-  const router=useRouter()
-  const post = computed(() => postsStore.posts.find(p => p._id === route.params.id))
-  // 在 <script setup> 里，computed 下面
-console.log('route.path:', route.path)
-console.log('route.params:', route.params)
-  function goHome() {
-    router.push('/')
-  }
-  //
-  const commentText=ref('')
-  //watch监听
- watch(() => post.value?.likes, (newlikes) => {
-  if (newlikes && newlikes >= 10) console.log("热门帖子!")
-}, { immediate: true })
-  //
-  const deletePost = postsStore.deletePost
-  const likesCount = postsStore.likesCount
-  const updatePosts = postsStore.updatePosts
-  const addComment=postsStore.addComment
-  const deleteComment=postsStore.deleteComment
-  const saveComment=postsStore.saveComment
+import CommentForm from "./CommentForm.vue"
+import CommentList from "./CommentList.vue"
+import LikeButton from "./LikeButton.vue"
+import { computed, watch, ref } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { usePostsStore } from "@/stores/post"
+import { useUserStore } from "@/stores/user"
+const userStore = useUserStore()
+const postsStore = usePostsStore()
+const route = useRoute()
+const router = useRouter()
+const post = computed(() => postsStore.posts.find((p) => p._id === route.params.id))
+// 在 <script setup> 里，computed 下面
+console.log("route.path:", route.path)
+console.log("route.params:", route.params)
+function goHome() {
+  router.push("/")
+}
+//
+const commentText = ref("")
+//watch监听
+watch(
+  () => post.value?.likes,
+  (newlikes) => {
+    if (newlikes && newlikes >= 10) console.log("热门帖子!")
+  },
+  { immediate: true },
+)
+//
+const deletePost = postsStore.deletePost
+const likesCount = postsStore.likesCount
+const updatePosts = postsStore.updatePosts
+const addComment = postsStore.addComment
+const deleteComment = postsStore.deleteComment
+const saveComment = postsStore.saveComment
 //删除帖子
-  function deletes(postId){
-    if(confirm("确定要删除吗？")){
-      deletePost(postId)
-      goHome()
-    }
+function deletes(postId) {
+  if (confirm("确定要删除吗？")) {
+    deletePost(postId)
+    goHome()
   }
+}
 
 //编辑
-const pId=ref(null)
-const pText=ref('')
-  function updates(postId,postCont){
-    pId.value=postId
-    pText.value=postCont
-  }
+const pId = ref(null)
+const pText = ref("")
+function updates(postId, postCont) {
+  pId.value = postId
+  pText.value = postCont
+}
 //内联编辑
-  function savePost(){
-    const newContent=pText.value
-    if(newContent!==null&&newContent.trim()!==""){
-    updatePosts(pId.value,newContent)
-    pText.value=''
-    pId.value=null
-    }
-  }
-  function cancelPost(){
+function savePost() {
+  const newContent = pText.value
+  if (newContent !== null && newContent.trim() !== "") {
+    updatePosts(pId.value, newContent)
+    pText.value = ""
     pId.value = null
   }
+}
+function cancelPost() {
+  pId.value = null
+}
 //
-  function handleSubmitComment(comment) {
-    addComment(post.value._id, comment)      
-      // 调用注入的 addComment
-  }
-  function handleDeleteComment(commentId) {
-    deleteComment(post.value._id, commentId)  
-      // 调用注入的 deleteComment
-  }
-  function Like(){
-    likesCount(post.value._id)
-    //点赞组件
-  }
-  function handleSaveComment(commentText, comtId) {
-    saveComment(post.value._id, comtId, commentText)
-       
-      // 调用注入的 saveComment
-  }
+function handleSubmitComment(comment) {
+  addComment(post.value._id, comment)
+  // 调用注入的 addComment
+}
+function handleDeleteComment(commentId) {
+  deleteComment(post.value._id, commentId)
+  // 调用注入的 deleteComment
+}
+function Like() {
+  likesCount(post.value._id)
+  //点赞组件
+}
+function handleSaveComment(commentText, comtId) {
+  saveComment(post.value._id, comtId, commentText)
+
+  // 调用注入的 saveComment
+}
 </script>
 
 <template>
   <div class="detail-container">
     <button class="back-btn" @click="goHome">← 回到首页</button>
-    
+
     <div v-if="post" class="post-card">
       <!-- 内联编辑模式 -->
       <div v-if="post._id == pId">
@@ -101,10 +105,10 @@ const pText=ref('')
             <button @click="updates(post._id, post.content)">编辑帖子</button>
             <button @click="deletes(post._id)">删除帖子</button>
           </template>
-          <LikeButton 
-            @like="Like" 
-            :likes="post.likes" 
-            :likedBy="post.likedBy" 
+          <LikeButton
+            @like="Like"
+            :likes="post.likes"
+            :likedBy="post.likedBy"
             :currentUserId="userStore.currentUser?._id"
           />
         </div>
@@ -113,12 +117,12 @@ const pText=ref('')
       <!-- 评论区 -->
       <div class="comment-section">
         <CommentForm v-model="commentText" @submit-comment="handleSubmitComment" />
-        <CommentList 
-          :comments="post.comments" 
+        <CommentList
+          :comments="post.comments"
           :postAuthorId="post.author?._id"
           :currentUserId="userStore.currentUser?._id"
-          @delete-comment="handleDeleteComment" 
-          @save-comment="handleSaveComment" 
+          @delete-comment="handleDeleteComment"
+          @save-comment="handleSaveComment"
         />
       </div>
     </div>
@@ -130,7 +134,7 @@ const pText=ref('')
 </template>
 
 <style scoped>
-  .detail-container {
+.detail-container {
   max-width: 1000px;
   margin: 0 auto;
   padding: var(--space-lg);
@@ -223,5 +227,4 @@ textarea {
 textarea:focus {
   border-color: var(--color-primary);
 }
-
 </style>

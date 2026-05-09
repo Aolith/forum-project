@@ -1,13 +1,13 @@
 <script setup>
-const props = defineProps(['modelValue'])
-const emit = defineEmits(['submit-comment', 'update:modelValue'])
+const props = defineProps(["modelValue"])
+const emit = defineEmits(["submit-comment", "update:modelValue"])
 
 function submit() {
   if (props.modelValue.trim()) {
-    emit('submit-comment', props.modelValue)
-    emit('update:modelValue', '')
+    emit("submit-comment", props.modelValue)
+    emit("update:modelValue", "")
   } else {
-    alert('内容不能为空!')
+    alert("内容不能为空!")
   }
 }
 </script>

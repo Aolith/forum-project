@@ -1,13 +1,13 @@
 <script setup>
-import { useUserStore } from '@/stores/user'
-import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { useUserStore } from "@/stores/user"
+import { useRouter } from "vue-router"
+import { ref } from "vue"
 
 const router = useRouter()
 const userStore = useUserStore()
-const nameId = ref('')
-const snoId = ref('')
-const numId = ref('')
+const nameId = ref("")
+const snoId = ref("")
+const numId = ref("")
 
 // 正则
 function validateSno(s) {
@@ -19,17 +19,17 @@ function validatePassword(n) {
 
 // 跳转登录
 function goLogin() {
-  alert('注册成功!请重新登录!')
-  router.push('/Login')
+  alert("注册成功!请重新登录!")
+  router.push("/Login")
 }
 
 async function handleRegister() {
   if (!validateSno(snoId.value)) {
-    alert('学号必须是10位数字')
+    alert("学号必须是10位数字")
     return
   }
   if (!validatePassword(numId.value)) {
-    alert('密码必须包含字母和数字,长度8-16位')
+    alert("密码必须包含字母和数字,长度8-16位")
     return
   }
   // 验证完成添加新用户
@@ -48,31 +48,19 @@ async function handleRegister() {
       <h2 class="auth-title">注册校园论坛</h2>
 
       <form @submit.prevent="handleRegister" class="auth-form">
-        <input
-          v-model="nameId"
-          type="text"
-          placeholder="姓名"
-          class="auth-input"
-        >
-        <input
-          v-model="snoId"
-          type="text"
-          placeholder="学号（10位数字）"
-          class="auth-input"
-        >
+        <input v-model="nameId" type="text" placeholder="姓名" class="auth-input" />
+        <input v-model="snoId" type="text" placeholder="学号（10位数字）" class="auth-input" />
         <input
           v-model="numId"
           type="password"
           placeholder="密码（8-16位，包含字母和数字）"
           class="auth-input"
           autocomplete="new-password"
-        >
+        />
         <button type="submit" class="btn-submit">确认注册</button>
       </form>
 
-      <p class="auth-link">
-        已有账号？<router-link to="/Login">去登录</router-link>
-      </p>
+      <p class="auth-link">已有账号？<router-link to="/Login">去登录</router-link></p>
     </div>
   </div>
 </template>
