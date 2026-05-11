@@ -116,7 +116,21 @@ function handleSaveComment(commentText, comtId) {
 
       <!-- 评论区 -->
       <div class="comment-section">
-        <CommentForm v-model="commentText" @submit-comment="handleSubmitComment" />
+        <!-- 已登录用户显示评论输入框 -->
+        <CommentForm
+          v-if="userStore.currentUser"
+          v-model="commentText"
+          @submit-comment="handleSubmitComment"
+        />
+        <!-- 游客模式：整张卡片可点击，跳转登录页 -->
+        <router-link to="/Login" v-else class="login-card">
+          <span class="card-icon">💬</span>
+          <div class="card-text">
+            <strong>参与讨论</strong>
+            <span>登录后即可发表评论</span>
+          </div>
+          <span class="card-arrow">→</span>
+        </router-link>
         <CommentList
           :comments="post.comments"
           :postAuthorId="post.author?._id"
@@ -125,6 +139,7 @@ function handleSaveComment(commentText, comtId) {
           @save-comment="handleSaveComment"
         />
       </div>
+
     </div>
 
     <div v-else>
@@ -226,5 +241,50 @@ textarea {
 }
 textarea:focus {
   border-color: var(--color-primary);
+}
+/* 游客登录提示 */
+.login-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  margin: var(--space-sm) 0;
+  background: var(--color-primary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.login-card:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+.card-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-text strong {
+  font-size: var(--font-size-body);
+  color: #fff;
+}
+
+.card-text span {
+  font-size: var(--font-size-small);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.card-arrow {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 </style>

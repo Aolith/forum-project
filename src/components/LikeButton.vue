@@ -12,9 +12,12 @@ const props = defineProps({
 const hasLiked = computed(() => {
   return props.likedBy?.includes(props.currentUserId)
 })
-
 function handleLike() {
-  emit("like")
+  if (!props.currentUserId) {
+    alert('登录后才能点赞')
+    return
+  }
+  emit('like')
 }
 </script>
 

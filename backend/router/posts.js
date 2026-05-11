@@ -4,7 +4,7 @@ const auth = require('../middleware/auth')
 
 const Post = require('../models/Post') //引入数据库
 //get接口
-postRouter.get('/', auth, async (req, res) => {
+postRouter.get('/', async (req, res) => {
   try {
     // 从查询参数中获取分页信息，设置默认值
     const page = parseInt(req.query.page) || 1 // 当前页码，默认第 1 页
