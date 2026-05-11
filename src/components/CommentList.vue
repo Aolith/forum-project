@@ -13,9 +13,11 @@ const emit = defineEmits(["delete-comment", "save-comment"])
 
 // 权限判断
 function canEdit(comment) {
+  if (!props.currentUserId) return false  // 游客不能编辑
   return comment.author?._id === props.currentUserId
 }
 function canDelete(comment) {
+  if (!props.currentUserId) return false  // 游客不能删除
   // 评论作者 或 帖主 可以删除
   return comment.author?._id === props.currentUserId || props.postAuthorId === props.currentUserId
 }
@@ -64,7 +66,7 @@ function cancel() {
     <div v-else>
       <p class="comment-body">{{ c.comment }}</p>
       <div class="comment-footer">
-        <span class="comment-author">{{ c.author?.name }}</span>
+        <span class="comment-author">{{ c.author?.name || '匿名用户'}}</span>
         <span class="comment-time">{{ formatTime(c.time) }}</span>
         <div class="comment-actions">
           <button v-if="canEdit(c)" @click="update(c._id, c.comment)" class="btn-sm btn-edit">

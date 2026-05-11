@@ -15,7 +15,7 @@ commentRouter.post('/', auth, async (req, res) => {
     }
     post.comments.push({
       comment: comment,
-      author: req.user._id,
+      author: req.user ? req.user._id : null
     })
     await post.save()
 
@@ -39,16 +39,19 @@ commentRouter.delete('/:commentId', auth, async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: '帖子不存在' })
     }
-    const deletedCmt = post.comments.id(commentId)
-    if (!deletedCmt) {
-      return res.status(404).json({ error: '评论不存在' })
-    }
+    const comment = post.comments.id(commentId)
+    if (!comment) return res.status(404).json({ error: '评论不存在' })
+
     //身份验证
     const user = req.user._id //从 token 里拿的当前用户 _id
-    if (user !== deletedCmt.author.toString() && user != post.author.toString()) {
+    const isCommentAuthor = comment.author && comment.author.toString() === user
+    const isPostAuthor = post.author.toString() === user
+    
+    if (!isCommentAuthor && !isPostAuthor) {
       return res.status(403).json({ error: '无权限删除此评论' })
     }
-    deletedCmt.deleteOne() // 删除这条子文档
+
+    comment.deleteOne() // 删除这条子文档
     await post.save() //保存
     res.json(post) //返回更新后的整个帖子
   } catch (err) {
@@ -72,8 +75,9 @@ commentRouter.put('/:commentId', auth, async (req, res) => {
       return res.status(404).json({ error: '评论不存在' })
     }
     //身份验证
-    const user = req.user._id //从 token 里拿的当前用户 _id
-    if (user !== commentDoc.author.toString()) {
+    // 编辑评论的权限判断
+    const user = req.user._id
+    if (!commentDoc.author || commentDoc.author.toString() !== user) {
       return res.status(403).json({ error: '只能编辑自己的评论' })
     }
     commentDoc.comment = comment // 直接改子文档的 comment 属性
