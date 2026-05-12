@@ -34,7 +34,7 @@ export const useUserStore = defineStore("user", () => {
   //用户登录
   async function userLogin(snoId, numId) {
     try {
-      const res = await fetch("https://forum-project-production.up.railway.app/api/users/login", {
+      const res = await fetch("/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sno: snoId, password: numId }),
@@ -58,7 +58,7 @@ export const useUserStore = defineStore("user", () => {
   async function addUser(nameId, snoId, numId) {
     try {
       const res = await fetch(
-        "https://forum-project-production.up.railway.app/api/users/register",
+        "/api/users/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -7,7 +7,7 @@ export const usePostsStore = defineStore("post", () => {
   // 初始化：从数据库拉取
   async function fetchPosts() {
     try {
-      const res = await fetch("https://forum-project-production.up.railway.app/api/posts")
+      const res = await fetch("/api/posts")
       if (!res.ok) throw new Error("获取帖子失败")
       const data = await res.json()
       posts.value = data
@@ -46,7 +46,7 @@ export const usePostsStore = defineStore("post", () => {
   // 添加帖子的方法
   async function addPost(content, title) {
     try {
-      const res = await fetch("https://forum-project-production.up.railway.app/api/posts", {
+      const res = await fetch("/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export const usePostsStore = defineStore("post", () => {
   //删除帖子
   async function deletePost(id) {
     try {
-      const res = await fetch(`https://forum-project-production.up.railway.app/api/posts/${id}`, {
+      const res = await fetch(`/api/posts/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export const usePostsStore = defineStore("post", () => {
   //编辑帖子
   async function updatePosts(id, newContent) {
     try {
-      const res = await fetch(`https://forum-project-production.up.railway.app/api/posts/${id}`, {
+      const res = await fetch(`/api/posts/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -121,7 +121,7 @@ export const usePostsStore = defineStore("post", () => {
     isLiking = true //上锁
     try {
       const res = await fetch(
-        `https://forum-project-production.up.railway.app/api/posts/${id}/likes`,
+        `/api/posts/${id}/likes`,
         {
           method: "PUT",
           headers: {
@@ -148,7 +148,7 @@ export const usePostsStore = defineStore("post", () => {
   async function addComment(postId, newComment) {
     try {
       const res = await fetch(
-        `https://forum-project-production.up.railway.app/api/posts/${postId}/comments`,
+        `/api/posts/${postId}/comments`,
         {
           method: "POST",
           headers: {
@@ -174,7 +174,7 @@ export const usePostsStore = defineStore("post", () => {
   async function deleteComment(postId, commentId) {
     try {
       const res = await fetch(
-        `https://forum-project-production.up.railway.app/api/posts/${postId}/comments/${commentId}`,
+        `/api/posts/${postId}/comments/${commentId}`,
         {
           method: "DELETE",
           headers: {
@@ -199,7 +199,7 @@ export const usePostsStore = defineStore("post", () => {
   async function saveComment(postId, commentId, comment) {
     try {
       const res = await fetch(
-        `https://forum-project-production.up.railway.app/api/posts/${postId}/comments/${commentId}`,
+        `/api/posts/${postId}/comments/${commentId}`,
         {
           method: "PUT",
           headers: {
