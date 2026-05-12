@@ -18,7 +18,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior() {
+    return { top: 0 }
+  }
 })
+
+
 //路由守卫
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('forum-token')
