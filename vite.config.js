@@ -12,4 +12,12 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {                           
+      '/api': {
+        target: 'https://forum-project-production.up.railway.app',
+        changeOrigin: true
+      }
+    }
+  }
 })

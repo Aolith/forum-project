@@ -61,10 +61,13 @@ export const usePostsStore = defineStore("post", () => {
       }
       const newPost = await res.json()
       posts.value.push(newPost)
+      return newPost   // 把新帖子对象返回给调用方
     } catch (err) {
       console.error("新增帖子失败：", err)
+      throw err        // 把错误重新抛出，让组件能捕获
     }
   }
+
 
   //删除帖子
   async function deletePost(id) {

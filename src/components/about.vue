@@ -1,20 +1,50 @@
 <script setup>
 import { ref } from "vue"
-
+import { useRouter } from "vue-router"  // 用于跳转
 import { usePostsStore } from "@/stores/post"
 const postsStore = usePostsStore()
+const router = useRouter()
 
 const title = ref("")
 const content = ref("")
 
-function submit() {
-  if (content.value.trim() && title.value.trim()) {
-    // 触发 addPost 事件，把输入内容传出去
-    postsStore.addPost(content.value, title.value)
-    content.value = "" // 清空输入框
+//控制成功卡片的显示
+const showSuccessCard = ref(false)
+//倒计时秒数
+const countdown = ref(2)
+//提交中状态，防止重复点击
+const submitting = ref(false)
+async function submit() {
+  if (!content.value.trim() || !title.value.trim()) {
+    alert("标题和内容不能为空")
+    return
+  }
+  submitting.value = true               // 开始提交，按钮禁用
+  try {
+    await postsStore.addPost(content.value, title.value)  // 等待后端返回
+    
+    // === 发帖成功 ===
+    content.value = ""                  // 清空输入框
     title.value = ""
-  } else {
-    alert("内容不能为空")
+    
+    // 弹出成功卡片
+    showSuccessCard.value = true
+    countdown.value = 2
+    
+    // 启动倒计时
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer)
+        showSuccessCard.value = false
+        router.push('/')               // 自动跳转首页
+      }
+    }, 1000)
+    
+  } catch (err) {
+    alert('发布失败：' + (err.message || '网络错误，请稍后重试'))
+  } finally {
+    submitting.value = false           // 恢复按钮
   }
 }
 
@@ -38,6 +68,14 @@ function reset() {
       <div class="form-actions">
         <button @click="submit" class="btn btn-primary">发布帖子</button>
         <button @click="reset" class="btn btn-reset">清空重写</button>
+      </div>
+    </div>
+    <!-- 成功卡片 -->
+    <div v-if="showSuccessCard" class="success-overlay">
+      <div class="success-card">
+        <span class="success-icon">✅</span>
+        <p class="success-text">发布成功！</p>
+        <p class="success-hint">{{ countdown }}秒后自动返回首页</p>
       </div>
     </div>
   </div>
@@ -153,5 +191,45 @@ function reset() {
 .btn-reset:hover {
   background-color: var(--color-primary-light);
   color: var(--color-primary);
+}
+/* ========== 成功卡片样式 ========== */
+.success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.success-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  text-align: center;
+  box-shadow: var(--shadow-card-hover);
+  min-width: 250px;
+}
+
+.success-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+
+.success-text {
+  font-size: var(--font-size-title);
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.success-hint {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
 }
 </style>
