@@ -5,8 +5,13 @@ export const useThemeStore = defineStore("theme", () => {
   const STORAGE_KEY = "forum-theme"
   const saved = localStorage.getItem(STORAGE_KEY)
 
-  const theme = ref(saved || "light")
-
+  // 获取系统偏好（仅在没有保存记录时使用）
+  const getSystemPreference = () => {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light"
+  }
+  const theme = ref(saved || getSystemPreference())  
   // 1. 初始化：应用保存的主题（设置 html 属性）
   applyTheme(theme.value)
 
