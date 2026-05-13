@@ -66,7 +66,12 @@ function reset() {
       <textarea v-model="content" class="content-input" placeholder="分享你的想法..."></textarea>
 
       <div class="form-actions">
-        <button @click="submit" class="btn btn-primary">发布帖子</button>
+        <button 
+          @click="submit" 
+          class="btn btn-primary" 
+          :disabled="submitting"
+        >{{ submitting ? '发布中...' : '发布帖子' }}
+        </button>
         <button @click="reset" class="btn btn-reset">清空重写</button>
       </div>
     </div>
@@ -231,5 +236,11 @@ function reset() {
 .success-hint {
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>

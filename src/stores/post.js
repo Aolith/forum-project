@@ -44,7 +44,11 @@ export const usePostsStore = defineStore("post", () => {
   )
 
   // 添加帖子的方法
+
+  let isAddingPost = false
   async function addPost(content, title) {
+    if (isAddingPost) return// 防止重复提交
+    isAddingPost = true
     try {
       const res = await fetch("/api/posts", {
         method: "POST",
@@ -65,6 +69,8 @@ export const usePostsStore = defineStore("post", () => {
     } catch (err) {
       console.error("新增帖子失败：", err)
       throw err        // 把错误重新抛出，让组件能捕获
+    } finally {
+      isAddingPost = false // 解锁
     }
   }
 
