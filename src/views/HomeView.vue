@@ -1,12 +1,23 @@
 <script setup>
-import { computed, onMounted, onUnmounted } from "vue"
+import { ref,computed, onMounted, onUnmounted } from "vue"
 import { usePostsStore } from "@/stores/post"
 import { throttle } from "@/utils/throttle"
 const postsStore = usePostsStore()
+const currentCategory = ref('')
 
-const totalComments = computed(() => {
-  return postsStore.posts.length
-})
+const tabs = [
+  { key: '', label: '全部' },
+  { key: 'study', label: '学习交流' },
+  { key: 'life', label: '校园生活' },
+  { key: 'trade', label: '二手交易' },
+  { key: 'other', label: '树洞' },
+]
+
+function switchCategory(key) {
+  currentCategory.value = key
+  postsStore.fetchPosts(key)  // key 为空字符串时查全部
+}
+
 
 //创建节流后的滚动处理函数
 const handleScroll = throttle(() => {
@@ -19,6 +30,7 @@ const handleScroll = throttle(() => {
 }, 1000)
 
 onMounted(() => {
+  postsStore.fetchPosts() // 初始加载全部
   window.addEventListener("scroll", handleScroll)
 })
 onUnmounted(() => {
@@ -29,7 +41,15 @@ onUnmounted(() => {
 <template>
   <div class="home-container">
     <h1>校园论坛</h1>
-    <p>总帖子数:{{ totalComments }}</p>
+    <div class="category-nav">
+      <button
+        v-for="tab in tabs"
+        :key="tab.key"
+        @click="switchCategory(tab.key)"
+        :class="{ active: currentCategory === tab.key }"
+      >{{ tab.label }}
+      </button>
+    </div>
     <div v-for="post in postsStore.posts" :key="post._id" class="post">
       <router-link :to="'/post/' + post._id" class="post-link">
         <h2>{{ post.title }}</h2>
@@ -114,5 +134,27 @@ p {
   text-decoration: none;
   color: inherit;
   display: block; /* 让整个卡片可点击 */
+}
+
+/* -------------------- 分类导航 -------------------- */
+.category-nav {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+.category-nav button {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.category-nav button.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
 }
 </style>

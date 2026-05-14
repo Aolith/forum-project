@@ -7,6 +7,7 @@ const router = useRouter()
 
 const title = ref("")
 const content = ref("")
+const category = ref("")
 
 //控制成功卡片的显示
 const showSuccessCard = ref(false)
@@ -19,14 +20,19 @@ async function submit() {
     alert("标题和内容不能为空")
     return
   }
+  if (!category.value) {
+    alert("请选择分区")
+    return
+  }
   submitting.value = true               // 开始提交，按钮禁用
   try {
-    await postsStore.addPost(content.value, title.value)  // 等待后端返回
+    await postsStore.addPost(content.value, title.value, category.value)  // 等待后端返回
     
     // === 发帖成功 ===
     content.value = ""                  // 清空输入框
     title.value = ""
-    
+    category.value = ""
+
     // 弹出成功卡片
     showSuccessCard.value = true
     countdown.value = 2
@@ -59,6 +65,14 @@ function reset() {
 <template>
   <div class="write-post">
     <div class="form-card">
+      <label class="form-label">帖子分区</label>
+      <select v-model="category">
+        <option value="">请选择分区</option>
+        <option value="study">学习交流</option>
+        <option value="life">校园生活</option>
+        <option value="trade">二手交易</option>
+        <option value="other">树洞</option>
+      </select>
       <label class="form-label">帖子标题</label>
       <input v-model="title" class="title-input" placeholder="起个吸引人的标题吧..." />
 
@@ -242,5 +256,18 @@ function reset() {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-body);
+  background-color: var(--color-primary-light);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: var(--space-sm);
+  cursor: pointer;
 }
 </style>

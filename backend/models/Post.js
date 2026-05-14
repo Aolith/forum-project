@@ -37,8 +37,16 @@ const postSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    // 新增：记录点赞用户的 _id
+    // 记录点赞用户的 _id
     likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    //帖子分区
+    category: {
+      type: String,
+      required: true,
+      enum: ['study', 'life', 'trade', 'other'],
+      default: 'other'
+    },
+      
     comments: [commentSchema], // 这里引用上面定义的评论 Schema
   },
   {

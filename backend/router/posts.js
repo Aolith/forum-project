@@ -10,14 +10,17 @@ postRouter.get('/', async (req, res) => {
     const page = parseInt(req.query.page) || 1 // 当前页码，默认第 1 页
     const limit = parseInt(req.query.limit) || 10 // 每页数量，默认 10 条
     const skip = (page - 1) * limit // 跳过的文档数
-
-    const posts = await Post.find()
+    //分区筛选
+    const filter = {}
+    if (req.query.category) {
+      filter.category = req.query.category
+    }
+    const posts = await Post.find(filter)
       .populate('author', 'name')
       .populate('comments.author', 'name')
       .sort({ createdAt: -1 }) // 按创建时间倒序，最新的在前面
       .skip(skip)
       .limit(limit)
-
     res.json(posts)
   } catch (err) {
     console.error('获取帖子失败', err)
@@ -28,7 +31,7 @@ postRouter.get('/', async (req, res) => {
 postRouter.post('/', auth, async (req, res) => {
   try {
     //从请求体拿到前端发来的数据
-    const { content, title } = req.body
+    const { content, title, category } = req.body
     //简单检验
     if (!title) {
       return res.status(400).json({ error: '标题不能为空' })
@@ -36,11 +39,15 @@ postRouter.post('/', auth, async (req, res) => {
     if (!content) {
       return res.status(400).json({ error: '内容不能为空' })
     }
+    if (!category) {
+      return res.status(400).json({ error: '分区不能为空' })
+    }
     //构造新帖子对象
     const newPost = {
       //MongoDB 会自动为每条文档生成一个全局唯一的 _id 字段（类型是 ObjectId，不是数字）
       title,
       content,
+      category,
       author: req.user._id, //从 token 里拿的当前用户 _id
       likes: 0,
       comments: [],

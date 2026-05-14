@@ -5,18 +5,21 @@ export const usePostsStore = defineStore("post", () => {
   const STORAGE_KEY = "forum-posts"
   const posts = ref([]) // 初始为空，不从缓存恢复
   // 初始化：从数据库拉取
-  async function fetchPosts() {
+  async function fetchPosts(category) {
     try {
-      const res = await fetch("/api/posts")
+      // 先构建 URL
+      let url = '/api/posts'
+      if (category) {
+        url += `?category=${category}`
+      }
+    
+      const res = await fetch(url)
       if (!res.ok) throw new Error("获取帖子失败")
       const data = await res.json()
       posts.value = data
 
-      // 注意：这里不手动写 localStorage，因为你下面的 watch 会自动同步
     } catch (err) {
       console.error("从数据库获取帖子失败，尝试降级到本地缓存:", err)
-
-      // 降级：读缓存
       const cached = localStorage.getItem(STORAGE_KEY)
       if (cached) {
         try {
@@ -30,7 +33,6 @@ export const usePostsStore = defineStore("post", () => {
       }
     }
   }
-
   // store 创建时立即调用一次，拉取数据库数据
   fetchPosts()
 
@@ -46,7 +48,7 @@ export const usePostsStore = defineStore("post", () => {
   // 添加帖子的方法
 
   let isAddingPost = false
-  async function addPost(content, title) {
+  async function addPost(content, title, category) {
     if (isAddingPost) return// 防止重复提交
     isAddingPost = true
     try {
@@ -56,7 +58,7 @@ export const usePostsStore = defineStore("post", () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("forum-token")}`,
         },
-        body: JSON.stringify({ content, title }), // 只传 content，因为 title 后端固定
+        body: JSON.stringify({ content, title,category }), // 只传 content，因为 title 后端固定
       })
       if (!res.ok) {
         const errorData = await res.json()
@@ -253,6 +255,7 @@ export const usePostsStore = defineStore("post", () => {
 
   return {
     posts,
+    fetchPosts, 
     addPost,
     deletePost,
     likesCount,
