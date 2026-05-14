@@ -21,7 +21,26 @@ postRouter.get('/', async (req, res) => {
       .sort({ createdAt: -1 }) // 按创建时间倒序，最新的在前面
       .skip(skip)
       .limit(limit)
-    res.json(posts)
+    // 匿名帖子隐藏作者名称
+    const result = posts.map(post => {
+      const postObj = post.toObject()
+  
+    // 匿名帖子隐藏作者名
+      if (postObj.anonymous) {
+        postObj.author.name = '匿名用户'
+      }
+  
+    // 匿名帖子下的评论也隐藏作者名
+      postObj.comments.forEach(comment => {
+        if (postObj.anonymous && comment.author) {
+          comment.author.name = '匿名用户'
+        }
+      })
+  
+      return postObj
+    })
+
+    res.json(result)
   } catch (err) {
     console.error('获取帖子失败', err)
     res.status(500).json({ error: '服务器内部错误' })
@@ -31,7 +50,7 @@ postRouter.get('/', async (req, res) => {
 postRouter.post('/', auth, async (req, res) => {
   try {
     //从请求体拿到前端发来的数据
-    const { content, title, category } = req.body
+    const { content, title, category, anonymous } = req.body
     //简单检验
     if (!title) {
       return res.status(400).json({ error: '标题不能为空' })
@@ -48,6 +67,7 @@ postRouter.post('/', auth, async (req, res) => {
       title,
       content,
       category,
+      anonymous: anonymous || false, //如果前端没传匿名字段，默认 false
       author: req.user._id, //从 token 里拿的当前用户 _id
       likes: 0,
       comments: [],

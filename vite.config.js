@@ -13,9 +13,9 @@ export default defineConfig({
     },
   },
   server: {
-    proxy: {                           
+    proxy: {
       '/api': {
-        target: 'https://forum-project-production.up.railway.app',
+        target: 'http://localhost:3001',  // 本地后端地址
         changeOrigin: true
       }
     }

@@ -15,7 +15,8 @@ commentRouter.post('/', auth, async (req, res) => {
     }
     post.comments.push({
       comment: comment,
-      author: req.user._id 
+      author: req.user._id,
+      anonymous: post.anonymous //跟随帖子的匿名设置
     })
     await post.save()
 

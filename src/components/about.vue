@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { useRouter } from "vue-router"  // 用于跳转
 import { usePostsStore } from "@/stores/post"
 const postsStore = usePostsStore()
@@ -8,7 +8,23 @@ const router = useRouter()
 const title = ref("")
 const content = ref("")
 const category = ref("")
+const anonymous = ref(false)
+const showDropdown = ref(false)
 
+
+const categoryLabel = computed(() => {
+  const map = {
+    study: '学习交流',
+    life: '校园生活',
+    trade: '二手交易',
+    other: '树洞'
+  }
+  return map[category.value] || '请选择分区'
+})
+function selectCategory(value) {
+  category.value = value
+  showDropdown.value = false
+}
 //控制成功卡片的显示
 const showSuccessCard = ref(false)
 //倒计时秒数
@@ -26,12 +42,13 @@ async function submit() {
   }
   submitting.value = true               // 开始提交，按钮禁用
   try {
-    await postsStore.addPost(content.value, title.value, category.value)  // 等待后端返回
+    await postsStore.addPost(content.value, title.value, category.value, anonymous.value)  // 等待后端返回
     
     // === 发帖成功 ===
     content.value = ""                  // 清空输入框
     title.value = ""
     category.value = ""
+    anonymous.value = false
 
     // 弹出成功卡片
     showSuccessCard.value = true
@@ -66,13 +83,20 @@ function reset() {
   <div class="write-post">
     <div class="form-card">
       <label class="form-label">帖子分区</label>
-      <select v-model="category">
-        <option value="">请选择分区</option>
-        <option value="study">学习交流</option>
-        <option value="life">校园生活</option>
-        <option value="trade">二手交易</option>
-        <option value="other">树洞</option>
-      </select>
+      <!-- 自定义下拉 -->
+    <div class="custom-select" @click="showDropdown = !showDropdown">
+      <span>{{ categoryLabel }}</span>
+      <ul v-if="showDropdown">
+      <li @click.stop="selectCategory('study')">学习交流</li>
+      <li @click.stop="selectCategory('life')">校园生活</li>
+      <li @click.stop="selectCategory('trade')">二手交易</li>
+      <li @click.stop="selectCategory('other')">树洞</li>
+      </ul>
+    </div>
+      <!-- 新增：匿名发布勾选框 -->
+      <label class="form-label" v-if="category === 'other'">
+        <input type="checkbox" v-model="anonymous" /> 匿名发布
+      </label>
       <label class="form-label">帖子标题</label>
       <input v-model="title" class="title-input" placeholder="起个吸引人的标题吧..." />
 
@@ -257,17 +281,80 @@ function reset() {
   cursor: not-allowed;
   transform: none;
 }
-select {
+/* 自定义下拉框 */
+.custom-select {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  font-size: var(--font-size-body);
-  background-color: var(--color-primary-light);
-  border: none;
+  background: var(--color-primary-light);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  outline: none;
-  box-sizing: border-box;
-  margin-bottom: var(--space-sm);
   cursor: pointer;
+  position: relative;
+}
+
+.custom-select ul {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-xs);
+  list-style: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.custom-select li {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  margin: var(--space-xs);
+  transition: background var(--transition-fast);
+  color: var(--color-text-secondary);
+}
+
+.custom-select li:hover {
+  background: var(--color-primary-light);
+}
+.custom-select span {
+  color: var(--color-text-secondary);
+}
+/* 匿名复选框美化 */
+label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+input[type="checkbox"]:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
 }
 </style>

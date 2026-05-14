@@ -15,6 +15,10 @@ const commentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, //不能加括号
   },
+  anonymous: { 
+    type: Boolean, 
+    default: false 
+  },
 })
 
 // 2. 再定义帖子的主 Schema
@@ -46,7 +50,11 @@ const postSchema = new mongoose.Schema(
       enum: ['study', 'life', 'trade', 'other'],
       default: 'other'
     },
-      
+    //匿名
+    anonymous: {
+      type: Boolean,
+      default: false,
+    },
     comments: [commentSchema], // 这里引用上面定义的评论 Schema
   },
   {
