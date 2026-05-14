@@ -102,6 +102,10 @@ function cancel() {
   color: var(--color-text);
   margin-bottom: var(--space-xs);
   line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
 }
 
 /* 底部信息栏：作者 + 时间 + 操作按钮 */
@@ -190,6 +194,8 @@ function cancel() {
   font-size: var(--font-size-body);
   resize: vertical;
   outline: none;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .comment-textarea:focus {

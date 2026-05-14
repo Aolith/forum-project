@@ -173,6 +173,7 @@ function handleSaveComment(commentText, comtId) {
 }
 
 /* 帖子卡片 */
+/* 帖子卡片 */
 .post-card {
   background-color: var(--color-surface);
   border-radius: var(--radius-md);
@@ -186,6 +187,11 @@ function handleSaveComment(commentText, comtId) {
   font-size: 22px;
   color: var(--color-text);
   margin-bottom: var(--space-md);
+  /* 文本换行——防溢出 */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
 }
 
 .post-card .post-content {
@@ -194,8 +200,12 @@ function handleSaveComment(commentText, comtId) {
   color: var(--color-text);
   line-height: 1.8;
   margin-bottom: var(--space-md);
+  /* 文本换行——防溢出 */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
 }
-
 /* 操作按钮区 */
 .post-actions {
   display: flex;
