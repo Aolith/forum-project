@@ -15,7 +15,7 @@ commentRouter.post('/', auth, async (req, res) => {
     }
     post.comments.push({
       comment: comment,
-      author: req.user ? req.user._id : null
+      author: req.user._id 
     })
     await post.save()
 
@@ -53,6 +53,9 @@ commentRouter.delete('/:commentId', auth, async (req, res) => {
 
     comment.deleteOne() // 删除这条子文档
     await post.save() //保存
+    // 填充帖子作者和评论作者
+    await post.populate('author', 'name')
+    await post.populate('comments.author', 'name')
     res.json(post) //返回更新后的整个帖子
   } catch (err) {
     console.error('删除评论失败', err)
@@ -82,6 +85,9 @@ commentRouter.put('/:commentId', auth, async (req, res) => {
     }
     commentDoc.comment = comment // 直接改子文档的 comment 属性
     await post.save() //保存父文档
+    // 填充帖子作者和评论作者
+    await post.populate('author', 'name')
+    await post.populate('comments.author', 'name')
     res.json(post) //返回更新后的整个帖子
   } catch (err) {
     console.error('编辑评论失败', err)

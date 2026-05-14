@@ -97,6 +97,9 @@ postRouter.put('/:id', auth, async (req, res) => {
       return res.status(400).json({ error: '内容不能为空' })
     }
     const updatedPost = await Post.findByIdAndUpdate(id, { content }, { new: true })
+    updatedPost = await Post.findById(updatedPost._id)
+      .populate('author', 'name')
+      .populate('comments.author', 'name')
     res.json(updatedPost)
   } catch (err) {
     console.error('编辑帖子失败', err)
@@ -122,6 +125,8 @@ postRouter.put('/:id/likes', auth, async (req, res) => {
     post.likes += 1
     post.likedBy.push(req.user._id)
     await post.save()
+    await post.populate('author', 'name')
+    await post.populate('comments.author', 'name')
     return res.json(post)
   } catch (err) {
     console.error('点赞帖子失败', err)
