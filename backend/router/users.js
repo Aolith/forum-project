@@ -2,7 +2,7 @@ const express = require('express')
 const userRouter = express.Router()
 const bcrypt = require('bcryptjs') //引入哈希
 const jwt = require('jsonwebtoken')
-
+const auth = require('../middleware/auth')
 //引入数据库
 const User = require('../models/User')
 
