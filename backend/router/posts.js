@@ -164,7 +164,13 @@ postRouter.put('/:id', auth, async (req, res) => {
     if (content === undefined) {
       return res.status(400).json({ error: '内容不能为空' })
     }
-    const updatedPost = await Post.findByIdAndUpdate(id, { content }, { new: true })
+    // 过滤敏感词
+    const contentResult = filterSensitiveWords(content)
+
+    if (contentResult.blocked) {
+      return res.status(400).json({ error: '内容包含违规信息，修改失败' })
+    }
+    const updatedPost = await Post.findByIdAndUpdate(id, { content: contentResult.filtered }, { new: true })
     updatedPost = await Post.findById(updatedPost._id)
       .populate('author', 'name')
       .populate('comments.author', 'name')

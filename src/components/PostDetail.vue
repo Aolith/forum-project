@@ -132,6 +132,7 @@ function handleSaveComment(commentText, comtId) {
         </router-link>
         <CommentList
           :comments="post.comments"
+          :postId="post._id" 
           :postAuthorId="post.author?._id"
           :currentUserId="userStore.currentUser?._id"
           @delete-comment="handleDeleteComment"

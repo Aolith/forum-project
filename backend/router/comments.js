@@ -92,7 +92,12 @@ commentRouter.put('/:commentId', auth, async (req, res) => {
     if (!commentDoc.author || commentDoc.author.toString() !== user) {
       return res.status(403).json({ error: '只能编辑自己的评论' })
     }
-    commentDoc.comment = comment // 直接改子文档的 comment 属性
+    // 过滤敏感词
+    const result = filterSensitiveWords(comment)
+    if (result.blocked) {
+      return res.status(400).json({ error: '评论包含违规信息' })
+    }
+    commentDoc.comment = result.filtered // 直接改子文档的 comment 属性
     await post.save() //保存父文档
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')

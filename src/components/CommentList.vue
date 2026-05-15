@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from "vue"
+import { usePostsStore } from "@/stores/post"
 
+const postsStore = usePostsStore()
 const editingId = ref(null)
 const editText = ref("")
 
@@ -39,12 +41,21 @@ function update(comtId, comment) {
   editText.value = comment
 }
 
-function save() {
-  emit("save-comment", editText.value, editingId.value)
-  editText.value = ""
-  editingId.value = null
+async function save() {
+  try {
+    await postsStore.saveComment(
+      props.postId,       // 需要父组件传入 postId
+      editingId.value,
+      editText.value
+    )
+    // 成功后才退出编辑模式
+    editText.value = ""
+    editingId.value = null
+  } catch (err) {
+    alert("编辑失败：" + (err.message || "网络错误，请稍后重试"))
+    // 编辑区保留，用户可以修改后重试
+  }
 }
-
 function cancel() {
   editingId.value = null
   editText.value = ""
