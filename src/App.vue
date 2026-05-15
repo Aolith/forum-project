@@ -4,7 +4,7 @@
   <!-- 左侧：始终显示的导航链接 -->
       <div>
         <router-link to="/">论坛首页</router-link>
-        <router-link to="/about">写帖子</router-link>
+        <router-link to="/write">写帖子</router-link>
       </div>
 
   <!-- 右侧：用户操作 + 主题切换 包在一起 -->

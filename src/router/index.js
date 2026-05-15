@@ -1,14 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router"
 import HomeView from "../views/HomeView.vue"
-import About from "../components/about.vue"
-import Login from "@/components/Login.vue"
-import Register from "@/components/Register.vue"
 
 const routes = [
   { path: "/", component: HomeView },
-  { path: "/about", component: About },
-  { path: "/Login", component: Login },
-  { path: "/Register", component: Register },
+  { path: "/write", component: () => import("../views/WritePost.vue") },  // 懒加载
+  { path: "/Login", component: () => import("../views/Login.vue") },  // 懒加载
+  { path: "/Register", component: () => import("../views/Register.vue") },  // 懒加载
   { path: "/Profile", component: () => import("../views/Profile.vue") },
   {
     path: "/post/:id",
