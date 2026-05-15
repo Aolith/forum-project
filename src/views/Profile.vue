@@ -51,12 +51,11 @@ function logout() {
         <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
       </figure>
 
-      <!-- 昵称：头像下面 -->
+      <!-- 姓名：头像下面 -->
       <dl class="info-row">
-        <dt>昵称</dt>
+        <dt>姓名</dt>
         <dd>
-          <input v-if="editing" v-model="nickname" maxlength="7" />
-          <span v-else>{{ nickname || "未设置" }}</span>
+        {{ nickname || "未设置" }}
         </dd>
       </dl>
 
@@ -124,28 +123,6 @@ function logout() {
 
 .info-row dd {
   margin: 0;
-}
-
-.info-row input,
-.info-row span {
-  font-size: var(--font-size-body);
-  color: var(--color-text);
-}
-
-.info-row span {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: pre-wrap;
-  overflow: hidden;
-}
-
-.info-row input {
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  text-align: center;
-  outline: none;
 }
 
 

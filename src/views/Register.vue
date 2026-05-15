@@ -13,9 +13,6 @@ const numId = ref("")
 function validateSno(s) {
   return /^\d{10}$/.test(s)
 }
-function validateName(s) {
-  return s.length >= 1 && s.length <= 7
-}
 function validatePassword(n) {
   return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(n)
 }
@@ -33,10 +30,6 @@ async function handleRegister() {
   }
   if (!validatePassword(numId.value)) {
     alert("密码必须包含字母和数字,长度8-16位")
-    return
-  }
-  if (!validateName(nameId.value)) {
-    alert("姓名必须1-7个字")
     return
   }
   // 验证完成添加新用户

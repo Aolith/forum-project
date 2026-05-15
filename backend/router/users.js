@@ -81,23 +81,16 @@ userRouter.post('/register', async (req, res) => {
 // 更新个人资料
 userRouter.put('/profile', auth, async (req, res) => {
   try {
-    const { name, signature, avatar } = req.body  // 先解构
+    const { signature, avatar } = req.body  // 先解构
 
     // 非空校验移到解构之后
-    if (name !== undefined && name.trim() === '') {
-      return res.status(400).json({ error: '昵称不能为空' })
-    }
     const user = await User.findById(req.user._id)
     if (!user) return res.status(404).json({ error: '用户不存在' })
 
-    if (name && name.length > 7) {
-      return res.status(400).json({ error: '昵称不能超过7个字' })
-    }
     if (signature && signature.length > 50) {
       return res.status(400).json({ error: '签名不能超过50个字' })
     }
 
-    if (name !== undefined) user.name = name
     if (signature !== undefined) user.signature = signature
     if (avatar !== undefined) user.avatar = avatar
 
