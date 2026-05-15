@@ -1,12 +1,11 @@
 <script setup>
-import { ref,computed, onMounted, onUnmounted } from "vue"
+import { ref, onMounted, onUnmounted } from "vue"
 import { usePostsStore } from "@/stores/post"
 import { throttle } from "@/utils/throttle"
 const postsStore = usePostsStore()
-const currentCategory = ref('')
-
+const currentCategory = ref('hot')
 const tabs = [
-  { key: '', label: '全部' },
+  { key: 'hot', label: '推荐' },
   { key: 'study', label: '学习交流' },
   { key: 'life', label: '校园生活' },
   { key: 'trade', label: '二手交易' },
@@ -15,23 +14,28 @@ const tabs = [
 
 function switchCategory(key) {
   currentCategory.value = key
-  postsStore.fetchPosts(key)  // key 为空字符串时查全部
+  if (key === 'hot') {
+    postsStore.fetchPosts('', 'hot')
+  } else {
+    postsStore.fetchPosts(key)
+  }
 }
-
 
 //创建节流后的滚动处理函数
 const handleScroll = throttle(() => {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement
-
-  //距离底部 50px 时触发加载更多
   if (scrollTop + clientHeight >= scrollHeight - 50) {
-    postsStore.loadMorePosts()
+    if (currentCategory.value === 'hot') {
+      postsStore.loadMorePosts('hot')  // 推荐页：传热度排序
+    } else {
+      postsStore.loadMorePosts()        // 其他分区：默认时间排序
+    }
   }
 }, 1000)
 
 onMounted(() => {
-  postsStore.fetchPosts() // 初始加载全部
-  window.addEventListener("scroll", handleScroll)
+  postsStore.fetchPosts('', 'hot')
+  window.addEventListener('scroll', handleScroll)
 })
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll)

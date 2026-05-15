@@ -6,39 +6,70 @@ const Post = require('../models/Post') //引入数据库
 //get接口
 postRouter.get('/', async (req, res) => {
   try {
-    // 从查询参数中获取分页信息，设置默认值
-    const page = parseInt(req.query.page) || 1 // 当前页码，默认第 1 页
-    const limit = parseInt(req.query.limit) || 10 // 每页数量，默认 10 条
-    const skip = (page - 1) * limit // 跳过的文档数
-    //分区筛选
+    // 从查询参数中获取分页信息
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit
+
+    // 分区筛选
     const filter = {}
     if (req.query.category) {
       filter.category = req.query.category
     }
-    const posts = await Post.find(filter)
-      .populate('author', 'name')
-      .populate('comments.author', 'name')
-      .sort({ createdAt: -1 }) // 按创建时间倒序，最新的在前面
-      .skip(skip)
-      .limit(limit)
-    // 匿名帖子隐藏作者名称
+    let posts
+    if (req.query.sort === 'hot') {
+      // 按热度排序：likes + comments.length
+      posts = await Post.aggregate([
+        { $match: filter },
+        {
+          $addFields: {
+            heat: { $add: ['$likes', { $size: '$comments' }] }
+          }
+        },
+        { $sort: { heat: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ])
+
+      // 为了确保 populate 绝对可靠，我们用 .exec() 并手动处理
+      // 将结果中的每个普通 JS 对象，转换回 Mongoose 文档，以便 .populate() 可以生效
+      posts = posts.map(post => Post.hydrate(post))
+      
+      // 现在 posts 是 Mongoose 文档数组了，可以放心 populate
+      posts = await Promise.all(posts.map(async post => {
+        await post.populate('author', 'name')
+        await post.populate('comments.author', 'name')
+        return post
+      }))
+    }else {
+      // 原来的默认排序逻辑不变
+      posts = await Post.find(filter)
+        .populate('author', 'name')
+        .populate('comments.author', 'name')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+    }
+
+        // 匿名帖子隐藏作者名
     const result = posts.map(post => {
-      const postObj = post.toObject()
-  
-    // 匿名帖子隐藏作者名
+      const postObj = post.toObject ? post.toObject() : post
+
       if (postObj.anonymous) {
+        // 安全兜底只在匿名帖子里生效
+        if (!postObj.author || typeof postObj.author !== 'object') {
+          postObj.author = {}
+        }
         postObj.author.name = '匿名用户'
-      }
-  
-    // 匿名帖子下的评论也隐藏作者名
+      } 
+
       postObj.comments.forEach(comment => {
         if (postObj.anonymous && comment.author) {
-          comment.author.name = '匿名用户'
-        }
-      })
-  
-      return postObj
+        comment.author.name = '匿名用户'
+      }
     })
+    return postObj
+  })
 
     res.json(result)
   } catch (err) {
@@ -46,6 +77,7 @@ postRouter.get('/', async (req, res) => {
     res.status(500).json({ error: '服务器内部错误' })
   }
 })
+
 //添加新帖子
 postRouter.post('/', auth, async (req, res) => {
   try {

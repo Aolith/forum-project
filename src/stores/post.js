@@ -5,19 +5,18 @@ export const usePostsStore = defineStore("post", () => {
   const STORAGE_KEY = "forum-posts"
   const posts = ref([]) // 初始为空，不从缓存恢复
   // 初始化：从数据库拉取
-  async function fetchPosts(category) {
+  async function fetchPosts(category, sort) {
     try {
-      // 先构建 URL
       let url = '/api/posts'
-      if (category) {
-        url += `?category=${category}`
-      }
-    
+      const params = []
+      if (category) params.push(`category=${category}`)
+      if (sort) params.push(`sort=${sort}`)
+      if (params.length) url += '?' + params.join('&')
+
       const res = await fetch(url)
       if (!res.ok) throw new Error("获取帖子失败")
       const data = await res.json()
       posts.value = data
-
     } catch (err) {
       console.error("从数据库获取帖子失败，尝试降级到本地缓存:", err)
       const cached = localStorage.getItem(STORAGE_KEY)
@@ -33,8 +32,8 @@ export const usePostsStore = defineStore("post", () => {
       }
     }
   }
-  // store 创建时立即调用一次，拉取数据库数据
-  fetchPosts()
+  
+  fetchPosts('', 'hot')
 
   //watch持久化
   watch(
@@ -235,23 +234,24 @@ export const usePostsStore = defineStore("post", () => {
   // 分页加载更多帖子
   let currentPage = 1
 
-  async function loadMorePosts() {
-    currentPage++
-    try {
-      const res = await fetch(`/api/posts?page=${currentPage}&limit=10`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("forum-token")}`,
-        },
-      })
-      if (!res.ok) throw new Error("加载更多帖子失败")
-      const newPosts = await res.json()
-      // 追加新数据，不覆盖已有数据
-      posts.value.push(...newPosts)
-    } catch (err) {
-      console.error("加载更多帖子失败", err)
-      currentPage-- // 失败时回滚页码
-    }
+  async function loadMorePosts(sort) {
+  currentPage++
+  try {
+    const params = [`page=${currentPage}`, 'limit=10']
+    if (sort) params.push(`sort=${sort}`)
+    const res = await fetch(`/api/posts?${params.join('&')}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('forum-token')}`,
+      },
+    })
+    if (!res.ok) throw new Error("加载更多帖子失败")
+    const newPosts = await res.json()
+    posts.value.push(...newPosts)
+  } catch (err) {
+    console.error("加载更多帖子失败", err)
+    currentPage--
   }
+}
 
   return {
     posts,
