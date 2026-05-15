@@ -84,5 +84,28 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  return { users, currentUser, userLogin, logout, addUser }
+  async function updateProfile(profileData) {
+  try {
+    const res = await fetch("/api/users/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("forum-token")}`,
+      },
+      body: JSON.stringify(profileData),
+    })
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.error || "更新失败")
+    }
+    const data = await res.json()
+    currentUser.value = data.user
+    return { success: true }
+  } catch (err) {
+    console.error("更新个人资料失败", err)
+    return { success: false, msg: err.message }
+  }
+}
+
+  return { users, currentUser, userLogin, logout, addUser, updateProfile }
 })

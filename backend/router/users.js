@@ -68,4 +68,23 @@ userRouter.post('/register', async (req, res) => {
   }
 })
 
+// 更新个人资料
+userRouter.put('/profile', auth, async (req, res) => {
+  try {
+    const { name, signature, avatar } = req.body
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ error: '用户不存在' })
+
+    if (name !== undefined) user.name = name
+    if (signature !== undefined) user.signature = signature
+    if (avatar !== undefined) user.avatar = avatar
+
+    await user.save()
+    res.json({ user: { _id: user._id, sno: user.sno, name: user.name, signature: user.signature, avatar: user.avatar } })
+  } catch (err) {
+    console.error('更新个人资料失败', err)
+    res.status(500).json({ error: '服务器内部错误' })
+  }
+})
+
 module.exports = userRouter

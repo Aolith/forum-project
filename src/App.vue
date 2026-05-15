@@ -10,7 +10,9 @@
   <!-- 右侧：用户操作 + 主题切换 包在一起 -->
       <div style="display: flex; align-items: center; gap: 8px;">
         <template v-if="userStore.currentUser">
-          <button @click="userStore.logout">退出登录</button>
+          <router-link to="/profile" class="nav-avatar">
+            <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
+          </router-link>
         </template>
         <template v-else>
           <router-link to="/Login">登录</router-link>
@@ -77,5 +79,18 @@ nav button {
 nav button:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
+}
+.nav-avatar img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+  transition: border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.nav-avatar img:hover {
+  border-color: var(--color-primary);
 }
 </style>

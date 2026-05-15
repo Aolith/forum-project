@@ -3,11 +3,13 @@ import HomeView from "../views/HomeView.vue"
 import About from "../components/about.vue"
 import Login from "@/components/Login.vue"
 import Register from "@/components/Register.vue"
+
 const routes = [
   { path: "/", component: HomeView },
   { path: "/about", component: About },
   { path: "/Login", component: Login },
   { path: "/Register", component: Register },
+  { path: "/Profile", component: () => import("../views/Profile.vue") },
   {
     path: "/post/:id",
     component: () => import("../components/PostDetail.vue"),

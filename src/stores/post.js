@@ -231,14 +231,19 @@ export const usePostsStore = defineStore("post", () => {
     }
   }
 
-  // 分页加载更多帖子
-  let currentPage = 1
+// 分页加载更多帖子
+let currentPage = 1
+let isLoadingMore = false  // 防并发锁
 
-  async function loadMorePosts(sort) {
+async function loadMorePosts(sort, category) {
+  if (isLoadingMore) return  // 锁
+  isLoadingMore = true
+  
   currentPage++
   try {
     const params = [`page=${currentPage}`, 'limit=10']
     if (sort) params.push(`sort=${sort}`)
+    if (category) params.push(`category=${category}`)
     const res = await fetch(`/api/posts?${params.join('&')}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('forum-token')}`,
@@ -246,11 +251,16 @@ export const usePostsStore = defineStore("post", () => {
     })
     if (!res.ok) throw new Error("加载更多帖子失败")
     const newPosts = await res.json()
-    posts.value.push(...newPosts)
+    posts.value = [...posts.value, ...newPosts]
   } catch (err) {
     console.error("加载更多帖子失败", err)
     currentPage--
+  } finally {
+    isLoadingMore = false  // 解锁
   }
+}
+function resetPage() {
+  currentPage = 1
 }
 
   return {
@@ -264,5 +274,6 @@ export const usePostsStore = defineStore("post", () => {
     deleteComment,
     saveComment,
     loadMorePosts,
+    resetPage,
   }
 })

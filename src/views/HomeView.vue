@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue"
 import { usePostsStore } from "@/stores/post"
 import { throttle } from "@/utils/throttle"
+
 const postsStore = usePostsStore()
 const currentCategory = ref('hot')
 const tabs = [
@@ -12,8 +13,10 @@ const tabs = [
   { key: 'other', label: '树洞' },
 ]
 
+
 function switchCategory(key) {
   currentCategory.value = key
+  postsStore.resetPage()  // 重置页码
   if (key === 'hot') {
     postsStore.fetchPosts('', 'hot')
   } else {
@@ -21,24 +24,24 @@ function switchCategory(key) {
   }
 }
 
-//创建节流后的滚动处理函数
 const handleScroll = throttle(() => {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement
-  if (scrollTop + clientHeight >= scrollHeight - 50) {
+  if (scrollTop + clientHeight >= scrollHeight - 100) {
     if (currentCategory.value === 'hot') {
-      postsStore.loadMorePosts('hot')  // 推荐页：传热度排序
+      postsStore.loadMorePosts('hot')
     } else {
-      postsStore.loadMorePosts()        // 其他分区：默认时间排序
+      postsStore.loadMorePosts(null, currentCategory.value)
     }
   }
-}, 1000)
+}, 300) // 300ms 内最多触发一次
 
 onMounted(() => {
   postsStore.fetchPosts('', 'hot')
   window.addEventListener('scroll', handleScroll)
 })
+
 onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll)
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
