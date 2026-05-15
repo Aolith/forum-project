@@ -177,6 +177,7 @@ export const usePostsStore = defineStore("post", () => {
       posts.value = posts.value.map((p) => (p._id === updatedPost._id ? updatedPost : p))
     } catch (err) {
       console.error("提交评论失败", err)
+      throw err
     }
   }
 

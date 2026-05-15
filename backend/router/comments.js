@@ -3,18 +3,26 @@ const commentRouter = express.Router({ mergeParams: true }) //嵌套路由的核
 const auth = require('../middleware/auth')
 
 const Post = require('../models/Post') //引入数据库
+const filterSensitiveWords = require('../utils/filterSensitiveWords')
 //提交评论
 commentRouter.post('/', auth, async (req, res) => {
   try {
     const postId = req.params.postId
     const { comment } = req.body
     if (!comment) return res.status(400).json({ error: '评论内容不能为空' })
+      // 过滤敏感词
+    const result = filterSensitiveWords(comment)
+    if (result.blocked) {
+      return res.status(400).json({ error: '评论包含违规信息' })
+    }
+    const filteredComment = result.filtered  // 用新变量接收过滤后的文本
+
     const post = await Post.findById(postId) //得到帖子对象
     if (!post) {
       return res.status(404).json({ error: '帖子不存在' })
     }
     post.comments.push({
-      comment: comment,
+      comment: filteredComment,
       author: req.user._id,
       anonymous: post.anonymous //跟随帖子的匿名设置
     })

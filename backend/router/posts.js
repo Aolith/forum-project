@@ -3,6 +3,7 @@ const postRouter = express.Router()
 const auth = require('../middleware/auth')
 
 const Post = require('../models/Post') //引入数据库
+const filterSensitiveWords = require('../utils/filterSensitiveWords')
 //get接口
 postRouter.get('/', async (req, res) => {
   try {
@@ -93,11 +94,19 @@ postRouter.post('/', auth, async (req, res) => {
     if (!category) {
       return res.status(400).json({ error: '分区不能为空' })
     }
+    // 过滤敏感词
+    const titleResult = filterSensitiveWords(title)
+    const contentResult = filterSensitiveWords(content)
+
+    if (titleResult.blocked || contentResult.blocked) {
+      return res.status(400).json({ error: '内容包含违规信息，无法发布' })
+    }
+
     //构造新帖子对象
     const newPost = {
       //MongoDB 会自动为每条文档生成一个全局唯一的 _id 字段（类型是 ObjectId，不是数字）
-      title,
-      content,
+      title: titleResult.filtered,
+      content: contentResult.filtered,
       category,
       anonymous: anonymous || false, //如果前端没传匿名字段，默认 false
       author: req.user._id, //从 token 里拿的当前用户 _id

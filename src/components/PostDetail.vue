@@ -119,8 +119,7 @@ function handleSaveComment(commentText, comtId) {
         <!-- 已登录用户显示评论输入框 -->
         <CommentForm
           v-if="userStore.currentUser"
-          v-model="commentText"
-          @submit-comment="handleSubmitComment"
+          :postId="post._id"
         />
         <!-- 游客模式：整张卡片可点击，跳转登录页 -->
         <router-link to="/Login" v-else class="login-card">

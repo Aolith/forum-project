@@ -1,13 +1,30 @@
 <script setup>
-const props = defineProps(["modelValue"])
-const emit = defineEmits(["submit-comment", "update:modelValue"])
+import { ref } from "vue"
+import { usePostsStore } from "@/stores/post"
 
-function submit() {
-  if (props.modelValue.trim()) {
-    emit("submit-comment", props.modelValue)
-    emit("update:modelValue", "")
-  } else {
+const props = defineProps({
+  postId: String  // 帖子 ID，由父组件传入
+})
+
+const postsStore = usePostsStore()
+const commentText = ref("")
+const submitting = ref(false)
+
+async function submit() {
+  if (!commentText.value.trim()) {
     alert("内容不能为空!")
+    return
+  }
+  
+  submitting.value = true
+  try {
+    await postsStore.addComment(props.postId, commentText.value)
+    commentText.value = ""  // 成功才清空
+  } catch (err) {
+    alert("评论失败：" + (err.message || "网络错误，请稍后重试"))
+    // 不清空输入框，让用户修改
+  } finally {
+    submitting.value = false
   }
 }
 </script>
@@ -16,13 +33,14 @@ function submit() {
   <div class="comment-form">
     <p class="form-label">评论区</p>
     <textarea
-      :value="modelValue"
-      @input="$emit('update:modelValue', $event.target.value)"
+      v-model="commentText"
       placeholder="写下你的想法..."
       class="comment-input"
     ></textarea>
     <div class="form-actions">
-      <button @click="submit" class="btn-submit">提交评论</button>
+      <button @click="submit" class="btn-submit" :disabled="submitting">
+        {{ submitting ? "提交中..." : "提交评论" }}
+      </button>
     </div>
   </div>
 </template>
