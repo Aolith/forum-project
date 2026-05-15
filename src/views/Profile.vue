@@ -11,6 +11,18 @@ const signature = ref(userStore.currentUser?.signature || "")
 const editing = ref(false)
 
 async function saveProfile() {
+  if (nickname.value.length > 7) {
+    alert("昵称不能超过7个字")
+    return
+  }
+  if (signature.value.length > 50) {
+    alert("签名不能超过50个字")
+    return
+  }
+  if (!nickname.value.trim()) {
+    alert("昵称不能为空")
+    return
+  }
   const result = await userStore.updateProfile({
     name: nickname.value,
     signature: signature.value,
@@ -32,35 +44,39 @@ function logout() {
 </script>
 
 <template>
-  <div class="profile-page">
-    <div class="profile-card">
+  <main class="profile-page">
+    <article class="profile-card">
       <!-- 头像：居中 -->
-      <div class="avatar-section">
+      <figure class="avatar-section">
         <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
-      </div>
+      </figure>
 
       <!-- 昵称：头像下面 -->
-      <div class="info-row">
-        <label>昵称</label>
-        <input v-if="editing" v-model="nickname" />
-        <span v-else>{{ nickname || "未设置" }}</span>
-      </div>
+      <dl class="info-row">
+        <dt>昵称</dt>
+        <dd>
+          <input v-if="editing" v-model="nickname" maxlength="7" />
+          <span v-else>{{ nickname || "未设置" }}</span>
+        </dd>
+      </dl>
 
       <!-- 签名：大框 -->
-      <div class="info-row">
-        <label>签名</label>
-        <textarea v-if="editing" v-model="signature" class="signature-input"></textarea>
-        <span v-else>{{ signature || "未设置" }}</span>
-      </div>
+      <dl class="info-row">
+        <dt>签名</dt>
+        <dd>
+          <textarea v-if="editing" v-model="signature" class="signature-input" maxlength="50" ></textarea>
+          <span v-else>{{ signature || "未设置" }}</span>
+        </dd>
+      </dl>
 
       <!-- 操作按钮 -->
-      <div class="actions">
+      <footer class="actions">
         <button v-if="editing" class="btn-save" @click="saveProfile">保存</button>
         <button class="btn-edit" @click="editing = !editing">{{ editing ? '取消' : '编辑资料' }}</button>
         <button class="btn-logout" @click="logout">退出登录</button>
-      </div>
-    </div>
-  </div>
+      </footer>
+    </article>
+  </main>
 </template>
 
 <style scoped>
@@ -91,22 +107,36 @@ function logout() {
   margin-bottom: var(--space-md);
 }
 
+.info-row dd {
+  margin: 0;
+}
 .info-row {
   display: flex;
   flex-direction: column;
   margin-bottom: var(--space-md);
 }
 
-.info-row label {
+.info-row dt {
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
   margin-bottom: var(--space-xs);
+}
+
+.info-row dd {
+  margin: 0;
 }
 
 .info-row input,
 .info-row span {
   font-size: var(--font-size-body);
   color: var(--color-text);
+}
+
+.info-row span {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
 }
 
 .info-row input {
@@ -117,6 +147,7 @@ function logout() {
   text-align: center;
   outline: none;
 }
+
 
 .actions {
   display: flex;
@@ -168,6 +199,11 @@ function logout() {
   resize: vertical;
   outline: none;
   text-align: center;
+  /* 文本换行——防溢出 */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
 }
 
 /* 编辑资料按钮：蓝底白字 */

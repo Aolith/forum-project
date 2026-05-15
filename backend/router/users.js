@@ -46,6 +46,16 @@ userRouter.post('/register', async (req, res) => {
     if (!sno || !password || !name) {
       return res.status(400).json({ error: '内容不能为空' })
     }
+    // 字数限制校验
+    if (name.length > 7) {
+      return res.status(400).json({ error: '姓名应为7个字以内' })
+    }
+    if (!/^\d{10}$/.test(sno)) {
+      return res.status(400).json({ error: '学号必须为10位数字' })
+    }
+    if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(password)) {
+      return res.status(400).json({ error: '密码必须包含字母和数字，长度8-16位' })
+    }
     //重复检查
     const key = await User.findOne({ sno })
     if (key) {
@@ -71,9 +81,21 @@ userRouter.post('/register', async (req, res) => {
 // 更新个人资料
 userRouter.put('/profile', auth, async (req, res) => {
   try {
-    const { name, signature, avatar } = req.body
+    const { name, signature, avatar } = req.body  // 先解构
+
+    // 非空校验移到解构之后
+    if (name !== undefined && name.trim() === '') {
+      return res.status(400).json({ error: '昵称不能为空' })
+    }
     const user = await User.findById(req.user._id)
     if (!user) return res.status(404).json({ error: '用户不存在' })
+
+    if (name && name.length > 7) {
+      return res.status(400).json({ error: '昵称不能超过7个字' })
+    }
+    if (signature && signature.length > 50) {
+      return res.status(400).json({ error: '签名不能超过50个字' })
+    }
 
     if (name !== undefined) user.name = name
     if (signature !== undefined) user.signature = signature
@@ -86,5 +108,4 @@ userRouter.put('/profile', auth, async (req, res) => {
     res.status(500).json({ error: '服务器内部错误' })
   }
 })
-
 module.exports = userRouter
