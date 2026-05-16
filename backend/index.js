@@ -28,6 +28,10 @@ app.use('/api/posts/:postId/comments', commentRouter)
 const userRouter = require('./router/users')
 app.use('/api/users', userRouter)
 
+//引入admin路由
+const adminRouter = require('./router/admin')
+app.use('/api/admin', adminRouter)
+
 //在指定端口启动服务器
 app.listen(port, () => {
   console.log(`服务器在${port}端口启动成功`)

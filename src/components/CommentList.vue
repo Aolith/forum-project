@@ -6,8 +6,9 @@ const postsStore = usePostsStore()
 const editingId = ref(null)
 const editText = ref("")
 
-const props = defineProps({
+const props = defineProps({   
   comments: Array,
+  postId: String,
   postAuthorId: String, // 帖主ID
   currentUserId: String, // 当前登录用户ID
 })

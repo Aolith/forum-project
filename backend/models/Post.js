@@ -19,6 +19,11 @@ const commentSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
+  status: {
+    type: String,
+    enum: ['normal', 'reported'],
+    default: 'normal'
+  },
 })
 
 // 2. 再定义帖子的主 Schema

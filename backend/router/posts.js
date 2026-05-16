@@ -208,4 +208,23 @@ postRouter.put('/:id/likes', auth, async (req, res) => {
   }
 })
 
+// 举报帖子
+postRouter.put('/:id/report', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+    if (!post) return res.status(404).json({ error: '帖子不存在' })
+    
+    if (post.status === 'reported') {
+      return res.status(400).json({ error: '该帖子已被举报' })
+    }
+    
+    post.status = 'reported'
+    await post.save()
+    res.json({ message: '举报成功' })
+  } catch (err) {
+    console.error('举报帖子失败', err)
+    res.status(500).json({ error: '服务器内部错误' })
+  }
+})
+
 module.exports = postRouter

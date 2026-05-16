@@ -73,6 +73,25 @@ function handleSaveComment(commentText, comtId) {
 
   // 调用注入的 saveComment
 }
+//举报帖子
+async function reportPost() {
+  if (!confirm('确认举报此帖子吗？')) return
+  try {
+    const res = await fetch(`/api/posts/${post.value._id}/report`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      }
+    })
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(data.error)
+    }
+    alert('举报成功，管理员将处理此帖子')
+  } catch (err) {
+    alert('举报失败：' + err.message)
+  }
+}
 </script>
 
 <template>
@@ -80,6 +99,11 @@ function handleSaveComment(commentText, comtId) {
     <button class="back-btn" @click="goHome">← 回到首页</button>
 
     <div v-if="post" class="post-card">
+      <button 
+        v-if="userStore.currentUser && String(post.author?._id) !== String(userStore.currentUser?._id)"
+        class="btn-report"
+        @click="reportPost"
+      >举报</button>
       <!-- 内联编辑模式 -->
       <div v-if="post._id == pId">
         <h2>{{ post.title }}</h2>
@@ -169,6 +193,7 @@ function handleSaveComment(commentText, comtId) {
 /* 帖子卡片 */
 /* 帖子卡片 */
 .post-card {
+  position: relative;
   background-color: var(--color-surface);
   border-radius: var(--radius-md);
   padding: var(--space-lg);
@@ -290,5 +315,33 @@ textarea:focus {
 .card-arrow {
   font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.9);
+}
+/* 举报按钮 */
+.btn-report {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.35;
+  transition: all var(--transition-fast);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-report:hover {
+  opacity: 1;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+  background: rgba(231, 76, 60, 0.08);
+}
+
+.btn-report:focus-visible {
+  opacity: 1;
+  outline: 2px solid #e74c3c;
+  outline-offset: 1px;
 }
 </style>
