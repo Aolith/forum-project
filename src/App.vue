@@ -34,6 +34,7 @@ const userStore = useUserStore()
 <style>
 /* 导航栏容器：居中 + 与首页同宽 */
 nav {
+  flex-wrap: wrap; 
   max-width: 1000px;
   margin: 0 auto;
   padding: var(--space-sm) var(--space-lg);
@@ -62,7 +63,9 @@ nav a.router-link-active {
   font-weight: bold;
   color: var(--color-primary);
 }
-
+nav a, nav button {
+  margin: 4px 0;
+}
 nav button {
   margin-left: 10px;
   background: none;
