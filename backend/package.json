@@ -17,8 +17,9 @@
     "dotenv": "^17.4.2",
     "ejs": "^5.0.2",
     "express": "^4.22.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
-    "mongo-express": "^1.1.0-rc-4",
     "mongoose": "^9.5.0"
   },
   "devDependencies": {
