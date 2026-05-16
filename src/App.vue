@@ -13,7 +13,6 @@
           <router-link to="/profile" class="nav-avatar">
             <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
           </router-link>
-          <router-link v-if="userStore.currentUser?.role === 'admin'" to="/admin">管理后台</router-link>
         </template>
         <template v-else>
           <router-link to="/Login">登录</router-link>

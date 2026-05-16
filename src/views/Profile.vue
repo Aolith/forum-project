@@ -6,25 +6,15 @@ import { useUserStore } from "@/stores/user"
 const userStore = useUserStore()
 const router = useRouter()
 
-const nickname = ref(userStore.currentUser?.name || "")
 const signature = ref(userStore.currentUser?.signature || "")
 const editing = ref(false)
 
 async function saveProfile() {
-  if (nickname.value.length > 7) {
-    alert("昵称不能超过7个字")
-    return
-  }
   if (signature.value.length > 50) {
     alert("签名不能超过50个字")
     return
   }
-  if (!nickname.value.trim()) {
-    alert("昵称不能为空")
-    return
-  }
   const result = await userStore.updateProfile({
-    name: nickname.value,
     signature: signature.value,
   })
   if (result.success) {
@@ -55,7 +45,7 @@ function logout() {
       <dl class="info-row">
         <dt>姓名</dt>
         <dd>
-        {{ nickname || "未设置" }}
+        {{ userStore.currentUser?.name  }}
         </dd>
       </dl>
 
@@ -67,6 +57,9 @@ function logout() {
           <span v-else>{{ signature || "未设置" }}</span>
         </dd>
       </dl>
+      
+      <!-- 管理后台 -->
+      <router-link v-if="userStore.currentUser?.role === 'admin'" to="/admin" class="btn-admin">管理后台</router-link>
 
       <!-- 操作按钮 -->
       <footer class="actions">
@@ -214,5 +207,24 @@ function logout() {
 
 .btn-save:hover {
   background: var(--color-primary-dark) !important;
+}
+
+.btn-admin {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-primary);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: var(--space-sm);
+}
+
+.btn-admin:hover {
+  background: var(--color-primary);
+  color: white;
 }
 </style>
