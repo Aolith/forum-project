@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const auth = require('../middleware/auth')
 //引入数据库
 const User = require('../models/User')
+const Whitelist = require('../models/Whitelist')
 
 //用户登录
 userRouter.post('/login', async (req, res) => {
@@ -55,6 +56,14 @@ userRouter.post('/register', async (req, res) => {
     }
     if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/.test(password)) {
       return res.status(400).json({ error: '密码必须包含字母和数字，长度8-16位' })
+    }
+    //白名单校验
+    const whitelistEntry = await Whitelist.findOne({ sno })
+    if (!whitelistEntry) {
+      return res.status(400).json({ error: '学号不存在，无法注册' })
+    }
+    if (whitelistEntry.name.trim() !== name.trim()) {
+      return res.status(400).json({ error: '姓名与学号不匹配' })
     }
     //重复检查
     const key = await User.findOne({ sno })
