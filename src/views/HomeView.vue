@@ -16,7 +16,8 @@ const tabs = [
 
 function switchCategory(key) {
   currentCategory.value = key
-  postsStore.resetPage()  // 重置页码
+  postsStore.saveCategory(key)  // 保存当前分区
+  postsStore.resetPage()
   if (key === 'hot') {
     postsStore.fetchPosts('', 'hot')
   } else {
@@ -36,13 +37,21 @@ const handleScroll = throttle(() => {
 }, 300) // 300ms 内最多触发一次
 
 onMounted(() => {
-  postsStore.fetchPosts('', 'hot')
+  currentCategory.value = postsStore.savedCategory  // 恢复分区
+  postsStore.fetchPosts('', postsStore.savedCategory === 'hot' ? 'hot' : null)
+  if (postsStore.savedCategory !== 'hot') {
+    postsStore.fetchPosts(postsStore.savedCategory)
+  } else {
+    postsStore.fetchPosts('', 'hot')
+  }
+  postsStore.restoreScrollPosition()
   window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
+
 </script>
 
 <template>

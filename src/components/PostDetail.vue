@@ -15,7 +15,8 @@ const post = computed(() => postsStore.posts.find((p) => p._id === route.params.
 console.log("route.path:", route.path)
 console.log("route.params:", route.params)
 function goHome() {
-  router.push("/")
+  postsStore.saveScrollPosition()  // 保存当前滚动位置
+  router.back()
 }
 //
 //watch监听

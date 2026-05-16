@@ -18,11 +18,13 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
-    return { top: 0 }
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition  // 返回上一页时，回到原来的位置
+    }
+    return { top: 0 }      // 正常跳转到新页面时，滚动到顶部
   }
 })
-
 
 //路由守卫
 router.beforeEach((to, from, next) => {

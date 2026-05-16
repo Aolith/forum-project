@@ -1,7 +1,23 @@
 import { defineStore } from "pinia"
-import { ref, watch } from "vue"
+import { ref, watch , nextTick} from "vue"
 
 export const usePostsStore = defineStore("post", () => {
+const savedScrollTop = ref(0)
+
+function saveScrollPosition() {
+  savedScrollTop.value = window.scrollY || document.documentElement.scrollTop
+}
+
+function restoreScrollPosition() {
+  nextTick(() => {
+    window.scrollTo(0, savedScrollTop.value)
+  })
+}
+const savedCategory = ref('hot')
+
+function saveCategory(category) {
+  savedCategory.value = category
+}
   const STORAGE_KEY = "forum-posts"
   const posts = ref([]) // 初始为空，不从缓存恢复
   // 初始化：从数据库拉取
@@ -266,6 +282,8 @@ function resetPage() {
 
   return {
     posts,
+    savedScrollTop,
+    savedCategory,
     fetchPosts, 
     addPost,
     deletePost,
@@ -276,5 +294,8 @@ function resetPage() {
     saveComment,
     loadMorePosts,
     resetPage,
+    saveScrollPosition,
+    restoreScrollPosition,
+    saveCategory,
   }
 })
