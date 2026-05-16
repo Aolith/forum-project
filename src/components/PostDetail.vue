@@ -18,7 +18,6 @@ function goHome() {
   router.push("/")
 }
 //
-const commentText = ref("")
 //watch监听
 watch(
   () => post.value?.likes,
@@ -31,7 +30,6 @@ watch(
 const deletePost = postsStore.deletePost
 const likesCount = postsStore.likesCount
 const updatePosts = postsStore.updatePosts
-const addComment = postsStore.addComment
 const deleteComment = postsStore.deleteComment
 const saveComment = postsStore.saveComment
 //删除帖子
@@ -61,11 +59,7 @@ function savePost() {
 function cancelPost() {
   pId.value = null
 }
-//
-function handleSubmitComment(comment) {
-  addComment(post.value._id, comment)
-  // 调用注入的 addComment
-}
+//删除评论
 function handleDeleteComment(commentId) {
   deleteComment(post.value._id, commentId)
   // 调用注入的 deleteComment
