@@ -1,4 +1,5 @@
 <script setup>
+defineOptions({ name: 'HomeView' })
 import { ref, onMounted, onUnmounted } from "vue"
 import { usePostsStore } from "@/stores/post"
 import { throttle } from "@/utils/throttle"
@@ -13,10 +14,8 @@ const tabs = [
   { key: 'other', label: '树洞' },
 ]
 
-
 function switchCategory(key) {
   currentCategory.value = key
-  postsStore.saveCategory(key)  // 保存当前分区
   postsStore.resetPage()
   if (key === 'hot') {
     postsStore.fetchPosts('', 'hot')
@@ -34,24 +33,17 @@ const handleScroll = throttle(() => {
       postsStore.loadMorePosts(null, currentCategory.value)
     }
   }
-}, 300) // 300ms 内最多触发一次
+}, 300)
 
 onMounted(() => {
-  currentCategory.value = postsStore.savedCategory  // 恢复分区
-  postsStore.fetchPosts('', postsStore.savedCategory === 'hot' ? 'hot' : null)
-  if (postsStore.savedCategory !== 'hot') {
-    postsStore.fetchPosts(postsStore.savedCategory)
-  } else {
-    postsStore.fetchPosts('', 'hot')
-  }
-  postsStore.restoreScrollPosition()
+  // 首次加载时拉取推荐数据
+  postsStore.fetchPosts('', 'hot')
   window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
-
 </script>
 
 <template>

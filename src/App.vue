@@ -20,7 +20,11 @@
         <button @click="themeStore.toggleTheme">切换主题</button>
       </div>
     </nav>
-    <router-view />
+    <router-view v-slot="{ Component }">
+      <keep-alive include="HomeView">
+        <component :is="Component" />
+      </keep-alive>
+    </router-view>
   </div>
 </template>
 
