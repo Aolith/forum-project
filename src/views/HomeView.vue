@@ -37,13 +37,14 @@ const handleScroll = throttle(() => {
 }, 300) // 300ms 内最多触发一次
 
 onMounted(() => {
-  currentCategory.value = postsStore.savedCategory
-  postsStore.shouldRestoreScroll = true  // 标记需要恢复
+  currentCategory.value = postsStore.savedCategory  // 恢复分区
+  postsStore.fetchPosts('', postsStore.savedCategory === 'hot' ? 'hot' : null)
   if (postsStore.savedCategory !== 'hot') {
     postsStore.fetchPosts(postsStore.savedCategory)
   } else {
     postsStore.fetchPosts('', 'hot')
   }
+  postsStore.restoreScrollPosition()
   window.addEventListener('scroll', handleScroll)
 })
 

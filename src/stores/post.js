@@ -8,47 +8,16 @@ function saveScrollPosition() {
   savedScrollTop.value = window.scrollY || document.documentElement.scrollTop
 }
 
+function restoreScrollPosition() {
+  nextTick(() => {
+    window.scrollTo(0, savedScrollTop.value)
+  })
+}
 const savedCategory = ref('hot')
 
 function saveCategory(category) {
   savedCategory.value = category
 }
-
-const shouldRestoreScroll = ref(false)
-
-function restoreScrollPosition() {
-  nextTick(() => {
-    let stableCount = 0
-    let lastHeight = document.documentElement.scrollHeight
-
-    const observer = new ResizeObserver(() => {
-      const newHeight = document.documentElement.scrollHeight
-      if (Math.abs(newHeight - lastHeight) < 5) {
-        // 高度变化小于 5px，视为稳定
-        stableCount++
-        if (stableCount >= 2) {
-          // 连续两次稳定，执行滚动
-          window.scrollTo(0, savedScrollTop.value)
-          shouldRestoreScroll.value = false
-          observer.disconnect()
-        }
-      } else {
-        stableCount = 0
-        lastHeight = newHeight
-      }
-    })
-
-    observer.observe(document.documentElement)
-
-    // 兜底：最多等 2 秒，超时强制滚动
-    setTimeout(() => {
-      window.scrollTo(0, savedScrollTop.value)
-      shouldRestoreScroll.value = false
-      observer.disconnect()
-    }, 2000)
-  })
-}
-
   const STORAGE_KEY = "forum-posts"
   const posts = ref([]) // 初始为空，不从缓存恢复
   // 初始化：从数据库拉取
@@ -64,9 +33,6 @@ function restoreScrollPosition() {
       if (!res.ok) throw new Error("获取帖子失败")
       const data = await res.json()
       posts.value = data
-      if (shouldRestoreScroll.value) {
-        restoreScrollPosition()
-      }
     } catch (err) {
       console.error("从数据库获取帖子失败，尝试降级到本地缓存:", err)
       const cached = localStorage.getItem(STORAGE_KEY)
@@ -318,7 +284,6 @@ function resetPage() {
     posts,
     savedScrollTop,
     savedCategory,
-    shouldRestoreScroll,
     fetchPosts, 
     addPost,
     deletePost,
