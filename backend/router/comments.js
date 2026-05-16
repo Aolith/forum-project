@@ -4,6 +4,7 @@ const auth = require('../middleware/auth')
 
 const Post = require('../models/Post') //引入数据库
 const filterSensitiveWords = require('../utils/filterSensitiveWords')
+const anonymizePost = require('../utils/anonymizePost')
 //提交评论
 commentRouter.post('/', auth, async (req, res) => {
   try {
@@ -31,8 +32,9 @@ commentRouter.post('/', auth, async (req, res) => {
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
-
-    res.status(201).json(post) //返回整个帖子
+    // 匿名处理
+    const end = anonymizePost(post)
+    return res.json(end)
   } catch (err) {
     console.error('新增评论失败', err)
     res.status(500).json({ error: '服务器内部错误' })
@@ -65,7 +67,9 @@ commentRouter.delete('/:commentId', auth, async (req, res) => {
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
-    res.json(post) //返回更新后的整个帖子
+    // 匿名处理
+    const end = anonymizePost(post)
+    return res.json(end)
   } catch (err) {
     console.error('删除评论失败', err)
     res.status(500).json({ error: '服务器内部错误' })
@@ -102,7 +106,9 @@ commentRouter.put('/:commentId', auth, async (req, res) => {
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
-    res.json(post) //返回更新后的整个帖子
+    // 匿名处理
+    const end = anonymizePost(post)
+    return res.json(end)
   } catch (err) {
     console.error('编辑评论失败', err)
     res.status(500).json({ error: '服务器内部错误' })

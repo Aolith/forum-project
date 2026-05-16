@@ -4,6 +4,7 @@ const auth = require('../middleware/auth')
 
 const Post = require('../models/Post') //引入数据库
 const filterSensitiveWords = require('../utils/filterSensitiveWords')
+const anonymizePost = require('../utils/anonymizePost')
 //get接口
 postRouter.get('/', async (req, res) => {
   try {
@@ -31,17 +32,12 @@ postRouter.get('/', async (req, res) => {
         { $skip: skip },
         { $limit: limit }
       ])
-
-      // 为了确保 populate 绝对可靠，我们用 .exec() 并手动处理
-      // 将结果中的每个普通 JS 对象，转换回 Mongoose 文档，以便 .populate() 可以生效
-      posts = posts.map(post => Post.hydrate(post))
-      
-      // 现在 posts 是 Mongoose 文档数组了，可以放心 populate
-      posts = await Promise.all(posts.map(async post => {
-        await post.populate('author', 'name')
-        await post.populate('comments.author', 'name')
-        return post
-      }))
+    posts = await Post.populate(posts, [
+    { path: 'author', select: 'name' },
+    { path: 'comments.author', select: 'name' }
+    ])
+    const result = posts.map(post => anonymizePost(post))
+    res.json(result)
     }else {
       // 原来的默认排序逻辑不变
       posts = await Post.find(filter)
@@ -50,29 +46,10 @@ postRouter.get('/', async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
+
+      const result = posts.map(post => anonymizePost(post))
+      res.json(result)
     }
-
-        // 匿名帖子隐藏作者名
-    const result = posts.map(post => {
-      const postObj = post.toObject ? post.toObject() : post
-
-      if (postObj.anonymous) {
-        // 安全兜底只在匿名帖子里生效
-        if (!postObj.author || typeof postObj.author !== 'object') {
-          postObj.author = {}
-        }
-        postObj.author.name = '匿名用户'
-      } 
-
-      postObj.comments.forEach(comment => {
-        if (postObj.anonymous && comment.author) {
-        comment.author.name = '匿名用户'
-      }
-    })
-    return postObj
-  })
-
-    res.json(result)
   } catch (err) {
     console.error('获取帖子失败', err)
     res.status(500).json({ error: '服务器内部错误' })
@@ -116,8 +93,9 @@ postRouter.post('/', auth, async (req, res) => {
     //增加数据文档
     let createdPost = await Post.create(newPost)
     createdPost = await createdPost.populate('author', 'name')
+    const result = anonymizePost(createdPost)  
     console.log('添加成功:', createdPost._id)
-    res.status(201).json(createdPost)
+    res.status(201).json(result) 
   } catch (err) {
     console.error('新增帖子失败', err)
     res.status(500).json({ error: '服务端内部错误' })
@@ -174,7 +152,8 @@ postRouter.put('/:id', auth, async (req, res) => {
     updatedPost = await Post.findById(updatedPost._id)
       .populate('author', 'name')
       .populate('comments.author', 'name')
-    res.json(updatedPost)
+    const result = anonymizePost(updatedPost) 
+    res.json(result)  
   } catch (err) {
     console.error('编辑帖子失败', err)
     res.status(500).json({ error: '服务器内部错误' })
@@ -201,7 +180,9 @@ postRouter.put('/:id/likes', auth, async (req, res) => {
     await post.save()
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
-    return res.json(post)
+     // 匿名处理
+    const result = anonymizePost(post)
+    return res.json(result)
   } catch (err) {
     console.error('点赞帖子失败', err)
     res.status(500).json({ error: '服务器内部错误' })
