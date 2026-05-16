@@ -87,7 +87,10 @@ onMounted(() => {
     <div v-else>
       <div v-for="post in reports" :key="post._id" class="report-card">
         <div class="report-info">
-          <p class="report-title">{{ post.title }}</p>
+          <p class="report-title">
+            <router-link :to="'/post/' + post._id">{{ post.title }}</router-link>
+          </p>
+          <p class="report-excerpt">{{ post.content?.slice(0, 80) }}...</p>
           <p class="report-meta">{{ post.author?.name }} · {{ new Date(post.createdAt).toLocaleDateString() }}</p>
         </div>
         <div class="report-actions">
@@ -161,6 +164,19 @@ onMounted(() => {
   transition: all var(--transition-fast);
 }
 
+.report-title a {
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.report-title a:hover {
+  color: var(--color-primary);
+}
+.report-excerpt {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+}
 .btn-delete {
   background: transparent;
   color: #e74c3c;

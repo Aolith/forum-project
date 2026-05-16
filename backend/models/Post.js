@@ -19,11 +19,6 @@ const commentSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
-  status: {
-    type: String,
-    enum: ['normal', 'reported'],
-    default: 'normal'
-  },
 })
 
 // 2. 再定义帖子的主 Schema
@@ -59,6 +54,11 @@ const postSchema = new mongoose.Schema(
     anonymous: {
       type: Boolean,
       default: false,
+    },
+    status: {
+      type: String,
+      enum: ['normal', 'reported'],
+      default: 'normal'
     },
     comments: [commentSchema], // 这里引用上面定义的评论 Schema
   },
