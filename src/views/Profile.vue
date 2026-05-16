@@ -9,6 +9,8 @@ const router = useRouter()
 const signature = ref(userStore.currentUser?.signature || "")
 const editing = ref(false)
 
+const showFeedback = ref(false)
+const feedbackText = ref("")
 async function saveProfile() {
   if (signature.value.length > 50) {
     alert("签名不能超过50个字")
@@ -29,6 +31,26 @@ function logout() {
   if (confirm("确认退出登录吗？")) {
     userStore.logout()
     router.push("/")
+  }
+}
+
+async function submitFeedback() {
+  if (!feedbackText.value.trim()) {
+    alert("建议内容不能为空")
+    return
+  }
+  try {
+    const res = await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: feedbackText.value })
+    })
+    if (!res.ok) throw new Error("提交失败")
+    alert("感谢你的建议！")
+    showFeedback.value = false
+    feedbackText.value = ""
+  } catch (err) {
+    alert("提交失败：" + err.message)
   }
 }
 </script>
@@ -57,7 +79,22 @@ function logout() {
           <span v-else>{{ signature || "未设置" }}</span>
         </dd>
       </dl>
-      
+
+      <!-- 提建议 -->
+      <div class="feedback-trigger" @click="showFeedback = true">
+        <span>💬 提建议</span>
+      </div>
+      <!-- 提建议弹窗 -->
+      <div v-if="showFeedback" class="feedback-overlay" @click.self="showFeedback = false">
+        <div class="feedback-card">
+          <p class="feedback-title">提建议</p>
+          <textarea v-model="feedbackText" placeholder="你的建议…" maxlength="200"></textarea>
+          <div class="feedback-actions">
+            <button @click="submitFeedback">提交</button>
+            <button @click="showFeedback = false">取消</button>
+          </div>
+        </div>
+      </div>
       <!-- 管理后台 -->
       <router-link v-if="userStore.currentUser?.role === 'admin'" to="/admin" class="btn-admin">管理后台</router-link>
 
@@ -226,5 +263,71 @@ function logout() {
 .btn-admin:hover {
   background: var(--color-primary);
   color: white;
+}
+/*提建议*/
+.feedback-trigger {
+  margin-bottom: var(--space-sm);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+.feedback-trigger:hover { opacity: 1; color: var(--color-primary); }
+
+.feedback-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.3);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+.feedback-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+.feedback-title {
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+.feedback-card textarea {
+  width: 100%;
+  height: 100px;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  resize: vertical;
+  outline: none;
+}
+.feedback-actions {
+  display: flex; justify-content: center; gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+.feedback-actions button {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-small);
+  transition: all var(--transition-fast);
+}
+.feedback-actions button:first-child {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+}
+.feedback-actions button:first-child:hover {
+  background: var(--color-primary-dark);
 }
 </style>

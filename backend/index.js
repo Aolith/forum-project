@@ -32,6 +32,10 @@ app.use('/api/users', userRouter)
 const adminRouter = require('./router/admin')
 app.use('/api/admin', adminRouter)
 
+//引入feedback路由
+const feedbackRouter = require('./router/feedback')
+app.use('/api/feedback', feedbackRouter)
+
 //在指定端口启动服务器
 app.listen(port, () => {
   console.log(`服务器在${port}端口启动成功`)
