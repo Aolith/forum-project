@@ -8,7 +8,7 @@
       </div>
 
   <!-- 右侧：用户操作 + 主题切换 包在一起 -->
-      <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
         <template v-if="userStore.currentUser">
           <router-link to="/profile" class="nav-avatar">
             <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
@@ -42,13 +42,16 @@ nav {
   margin-bottom: var(--space-md);
   border-bottom: 1px solid var(--color-border);
   display: flex;
-  justify-content: space-between; /* 左右分散对齐 */
   align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
 }
 
 
 nav a {
   margin-right: 15px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   text-decoration: none;
   color: var(--color-text-secondary);
   font-size: var(--font-size-body);
@@ -63,11 +66,11 @@ nav a.router-link-active {
   font-weight: bold;
   color: var(--color-primary);
 }
-nav a, nav button {
-  margin: 4px 0;
-}
+
 nav button {
   margin-left: 10px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   background: none;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
