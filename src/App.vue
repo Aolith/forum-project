@@ -16,7 +16,6 @@
         </template>
         <template v-else>
           <router-link to="/Login">登录</router-link>
-          <router-link to="/Register">注册</router-link>
         </template>
         <button @click="themeStore.toggleTheme">切换主题</button>
       </div>
