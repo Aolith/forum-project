@@ -99,12 +99,18 @@ async function likeComment(commentId) {
 
       <!-- 正常展示模式 -->
       <div v-else>
+      <div class="comment-header">
+        <span class="comment-author">{{ comment.author?.name || '匿名用户' }}</span>
+        <div v-if="canEdit(comment) || canDelete(comment)" class="comment-header-actions">
+          <button v-if="canEdit(comment)" @click="update(comment._id, comment.comment)" class="btn-sm btn-edit">编辑</button>
+          <button v-if="canDelete(comment)" @click="deletes(comment._id)" class="btn-sm btn-delete">删除</button>
+        </div>
+      </div>
         <p class="comment-body">
           <span v-if="comment.replyTo" class="reply-hint">回复 @{{ comment.replyTo?.name }}</span>
           {{ comment.comment }}
         </p>
         <div class="comment-footer">
-          <span class="comment-author">{{ comment.author?.name || '匿名用户' }}</span>
           <span class="comment-time">{{ formatTime(comment.time) }}</span>
           <!-- 已点赞：红心 + 数字 -->
           <span v-if="hasLikedComment" class="liked-count">
@@ -120,10 +126,6 @@ async function likeComment(commentId) {
           🤍{{ comment.likes || 0 }}
           </button>
           <button v-if="currentUserId" @click="$emit('reply', comment._id, comment.author?._id, comment.author?.name)" class="btn-sm btn-reply">回复</button>
-          <div class="comment-actions">
-            <button v-if="canEdit(comment)" @click="update(comment._id, comment.comment)" class="btn-sm btn-edit">编辑</button>
-            <button v-if="canDelete(comment)" @click="deletes(comment._id)" class="btn-sm btn-delete">删除</button>
-          </div>
         </div>
       </div>
     </div>
@@ -160,7 +162,11 @@ async function likeComment(commentId) {
 .comment-card:hover {
   background-color: var(--color-surface);
 }
-
+.comment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
 .comment-body {
   font-size: var(--font-size-body);
   color: var(--color-text);
@@ -171,17 +177,28 @@ async function likeComment(commentId) {
   white-space: pre-wrap;
   overflow: hidden;
 }
+.comment-header-actions {
+  display: inline-flex;
+  gap: var(--space-xs);
+  margin-left: auto;
+}
 
-.reply-hint {
-  color: var(--color-primary);
-  font-size: var(--font-size-small);
-  margin-right: 4px;
+.comment-time {
+  font-size: 11px;  /* 更小 */
+  color: var(--color-text-secondary);
+  opacity: 0.5;
 }
 
 .comment-footer {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+.reply-hint {
+  color: var(--color-primary);
+  font-size: var(--font-size-small);
+  margin-right: 4px;
 }
 
 .comment-author {
@@ -190,17 +207,6 @@ async function likeComment(commentId) {
   font-weight: 500;
 }
 
-.comment-time {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  margin-right: auto;
-  opacity: 0.7;
-}
-
-.comment-actions {
-  display: flex;
-  gap: var(--space-xs);
-}
 
 .btn-sm {
   padding: 2px 8px;
