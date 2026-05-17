@@ -33,7 +33,7 @@ postRouter.get('/', async (req, res) => {
         { $limit: limit }
       ])
     posts = await Post.populate(posts, [
-    { path: 'author', select: 'name' },
+    { path: 'author', select: 'name wechat showWechat' }, 
     { path: 'comments.author', select: 'name' }
     ])
     const result = posts.map(post => anonymizePost(post))
@@ -41,7 +41,7 @@ postRouter.get('/', async (req, res) => {
     }else {
       // 原来的默认排序逻辑不变
       posts = await Post.find(filter)
-        .populate('author', 'name')
+        .populate('author', 'name wechat showWechat') 
         .populate('comments.author', 'name')
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -92,7 +92,7 @@ postRouter.post('/', auth, async (req, res) => {
     }
     //增加数据文档
     let createdPost = await Post.create(newPost)
-    createdPost = await createdPost.populate('author', 'name')
+    createdPost = await createdPost.populate('author', 'name wechat showWechat')
     const result = anonymizePost(createdPost)  
     console.log('添加成功:', createdPost._id)
     res.status(201).json(result) 
@@ -150,7 +150,7 @@ postRouter.put('/:id', auth, async (req, res) => {
     }
     const updatedPost = await Post.findByIdAndUpdate(id, { content: contentResult.filtered }, { new: true })
     updatedPost = await Post.findById(updatedPost._id)
-      .populate('author', 'name')
+      .populate('author', 'name wechat showWechat')
       .populate('comments.author', 'name')
     const result = anonymizePost(updatedPost) 
     res.json(result)  
@@ -178,7 +178,7 @@ postRouter.put('/:id/likes', auth, async (req, res) => {
     post.likes += 1
     post.likedBy.push(req.user._id)
     await post.save()
-    await post.populate('author', 'name')
+    await post.populate('author', 'name wechat showWechat')
     await post.populate('comments.author', 'name')
      // 匿名处理
     const result = anonymizePost(post)

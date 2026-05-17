@@ -12,13 +12,15 @@ function anonymizePost(post) {
       postObj.author = {}
     }
     postObj.author.name = '匿名用户'
+    postObj.author.wechat = ''           
+    postObj.author.showWechat = false    
   }
 
   // 评论作者匿名
   if (postObj.comments && Array.isArray(postObj.comments)) {
     postObj.comments.forEach(comment => {
       if (postObj.anonymous && comment.author) {
-        comment.author.name = '匿名用户'
+        comment.author.name = '匿名用户'    
       }
     });
   }

@@ -90,7 +90,7 @@ userRouter.post('/register', async (req, res) => {
 // 更新个人资料
 userRouter.put('/profile', auth, async (req, res) => {
   try {
-    const { signature, avatar } = req.body  // 先解构
+    const { signature, avatar, wechat, showWechat } = req.body  // 先解构
 
     // 非空校验移到解构之后
     const user = await User.findById(req.user._id)
@@ -99,12 +99,15 @@ userRouter.put('/profile', auth, async (req, res) => {
     if (signature && signature.length > 50) {
       return res.status(400).json({ error: '签名不能超过50个字' })
     }
-
+    if (wechat && wechat.length > 20) {
+      return res.status(400).json({ error: '微信号不能超过20个字' })
+    }
     if (signature !== undefined) user.signature = signature
     if (avatar !== undefined) user.avatar = avatar
-
+    if (wechat !== undefined) user.wechat = wechat
+    if (showWechat !== undefined) user.showWechat = showWechat
     await user.save()
-    res.json({ user: { _id: user._id, sno: user.sno, name: user.name, signature: user.signature, avatar: user.avatar } })
+    res.json({ user: { _id: user._id, sno: user.sno, name: user.name, signature: user.signature, avatar: user.avatar, wechat: user.wechat, showWechat: user.showWechat } })
   } catch (err) {
     console.error('更新个人资料失败', err)
     res.status(500).json({ error: '服务器内部错误' })

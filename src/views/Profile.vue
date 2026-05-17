@@ -1,10 +1,11 @@
 <script setup>
 import { ref } from "vue"
-import { useRouter } from "vue-router"
+import { useRouter,useRoute } from "vue-router"
 import { useUserStore } from "@/stores/user"
 
 const userStore = useUserStore()
 const router = useRouter()
+const route = useRoute()
 
 const signature = ref(userStore.currentUser?.signature || "")
 const editing = ref(false)
@@ -14,6 +15,9 @@ const feedbackText = ref("")
 
 const uploadingAvatar = ref(false)
 const fileInput = ref(null)
+
+const wechat = ref(userStore.currentUser?.wechat || '')
+const showWechat = ref(userStore.currentUser?.showWechat || false)
 
 function triggerUpload() {
   fileInput.value.click()
@@ -62,6 +66,8 @@ async function saveProfile() {
   }
   const result = await userStore.updateProfile({
     signature: signature.value,
+    wechat: wechat.value,
+    showWechat: showWechat.value
   })
   if (result.success) {
     editing.value = false
@@ -97,6 +103,7 @@ async function submitFeedback() {
     alert("提交失败：" + err.message)
   }
 }
+
 </script>
 
 <template>
@@ -127,6 +134,25 @@ async function submitFeedback() {
         </dd>
       </dl>
 
+      <!-- 微信号 -->
+      <dl class="info-row">
+        <dt>微信号</dt>
+        <dd>
+          <input v-if="editing" v-model="wechat" placeholder="选填，用于二手交易联系" maxlength="30" />
+          <span v-else>
+          {{ wechat 
+            ? (route.params.userId && route.params.userId !== userStore.currentUser?._id 
+            ? wechat.slice(0, 2) + '****' + wechat.slice(-2) 
+            : wechat) 
+            : '未设置' 
+          }}
+          </span>
+        </dd>
+      </dl>
+      <label class="wechat-toggle" v-if="editing">
+        <input type="checkbox" v-model="showWechat" /> 在二手交易帖子中显示微信号
+      </label>
+      <p v-if="editing" class="wechat-hint">仅自己可见，他人查看时显示为星号</p>
       <!-- 提建议 -->
       <div class="feedback-trigger" @click="showFeedback = true">
         <span>💬 提建议</span>
@@ -221,15 +247,6 @@ async function submitFeedback() {
 .actions button:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
-}
-/* 头像区 */
-
-.avatar-section img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--color-primary);
 }
 
 /* 签名输入框：大框 */
@@ -395,11 +412,77 @@ async function submitFeedback() {
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
-.avatar-section {
-  position: relative;
-  cursor: pointer;
-}
+
 .avatar-section:hover .avatar-overlay {
   opacity: 1;
+}
+
+/* 微信号输入框 */
+.info-row input {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  text-align: center;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+}
+
+.info-row input:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+/* 微信号隐私开关 */
+.wechat-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  margin-top: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.wechat-toggle input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.wechat-toggle input[type="checkbox"]:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.wechat-toggle input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+}
+.wechat-hint {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  opacity: 0.5;
+  text-align: center;
+  margin-top: 2px;
+  margin-bottom: var(--space-xs);
 }
 </style>

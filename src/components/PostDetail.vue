@@ -93,6 +93,15 @@ async function reportPost() {
 function handleReply(commentId, authorId, authorName) {
   replyingTo.value = { commentId, authorId, authorName }
 }
+
+async function copyWechat(wechatId) {
+  try {
+    await navigator.clipboard.writeText(wechatId)
+    alert('微信号已复制：' + wechatId)
+  } catch (err) {
+    alert('复制失败，请手动复制：' + wechatId)
+  }
+}
 </script>
 
 <template>
@@ -130,6 +139,13 @@ function handleReply(commentId, authorId, authorName) {
             :likedBy="post.likedBy"
             :currentUserId="userStore.currentUser?._id"
           />
+          <button 
+            v-if="post.category === 'trade' && post.author?.wechat && post.author?.showWechat"
+            @click="copyWechat(post.author.wechat)"
+            class="btn-wechat-copy"
+          >
+          💬 联系Ta
+          </button>
         </div>
       </div>
 
@@ -347,5 +363,21 @@ textarea:focus {
   opacity: 1;
   outline: 2px solid #e74c3c;
   outline-offset: 1px;
+}
+
+.btn-wechat-copy {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #07c160;
+  background: #07c160;
+  color: white;
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-wechat-copy:hover {
+  background: #06ad56;
 }
 </style>

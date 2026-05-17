@@ -27,7 +27,15 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       default: ''
-    }
+    },
+    wechat: {
+      type: String,
+      default: ''
+    },
+    showWechat: {
+      type: Boolean,
+      default: false
+    },
   },
   {
     timestamps: true,
