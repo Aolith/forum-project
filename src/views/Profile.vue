@@ -2,7 +2,6 @@
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 import { useUserStore } from "@/stores/user"
-import * as qiniu from 'qiniu-js'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -26,26 +25,29 @@ async function handleAvatarUpload(e) {
 
   uploadingAvatar.value = true
   try {
-    // 1. 获取上传凭证
-    const res = await fetch('/api/upload/upload-token')
-    const { token } = await res.json()
+    // 1. 从后端获取签名
+    const res = await fetch('/api/upload/upload-signature')
+    const { timestamp, signature: uploadSignature, cloudName } = await res.json()
 
-    // 2. 上传到七牛云
-    const key = `avatars/${Date.now()}_${file.name}`
-    const observable = qiniu.upload(file, key, token, {}, { useCdnDomain: true })
+    // 2. 构建 FormData，直传 Cloudinary
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('api_key', '964427695737617') 
+    formData.append('timestamp', timestamp)
+    formData.append('signature', uploadSignature)
+    formData.append('folder', 'forum/avatars')
 
-    const result = await new Promise((resolve, reject) => {
-      observable.subscribe({
-        error: reject,
-        complete: (res) => {
-          const domain = 'http://tf6bioqh2.hd-bkt.clouddn.com'
-          resolve(`${domain}/${res.key}`)
-        }
-      })
+    const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData
     })
+    const data = await uploadRes.json()
+    console.log('Cloudinary 返回:', data)
+
+    if (!data.secure_url) throw new Error('上传失败')
 
     // 3. 更新用户头像
-    await userStore.updateProfile({ avatar: result })
+    await userStore.updateProfile({ avatar: data.secure_url })
     alert('头像更新成功！')
   } catch (err) {
     alert('头像上传失败：' + err.message)
@@ -196,9 +198,6 @@ async function submitFeedback() {
   margin-bottom: var(--space-xs);
 }
 
-.info-row dd {
-  margin: 0;
-}
 
 
 .actions {
@@ -224,11 +223,6 @@ async function submitFeedback() {
   color: var(--color-primary);
 }
 /* 头像区 */
-.avatar-section {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--space-md);
-}
 
 .avatar-section img {
   width: 80px;
@@ -380,6 +374,9 @@ async function submitFeedback() {
 .avatar-section {
   position: relative;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-md);
 }
 
 .avatar-overlay {
