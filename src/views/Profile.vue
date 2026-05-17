@@ -2,6 +2,7 @@
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 import { useUserStore } from "@/stores/user"
+import * as qiniu from 'qiniu-js'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -11,6 +12,47 @@ const editing = ref(false)
 
 const showFeedback = ref(false)
 const feedbackText = ref("")
+
+const uploadingAvatar = ref(false)
+const fileInput = ref(null)
+
+function triggerUpload() {
+  fileInput.value.click()
+}
+
+async function handleAvatarUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+
+  uploadingAvatar.value = true
+  try {
+    // 1. 获取上传凭证
+    const res = await fetch('/api/upload/upload-token')
+    const { token } = await res.json()
+
+    // 2. 上传到七牛云
+    const key = `avatars/${Date.now()}_${file.name}`
+    const observable = qiniu.upload(file, key, token, {}, { useCdnDomain: true })
+
+    const result = await new Promise((resolve, reject) => {
+      observable.subscribe({
+        error: reject,
+        complete: (res) => {
+          const domain = 'http://tf6bioqh2.hd-bkt.clouddn.com'
+          resolve(`${domain}/${res.key}`)
+        }
+      })
+    })
+
+    // 3. 更新用户头像
+    await userStore.updateProfile({ avatar: result })
+    alert('头像更新成功！')
+  } catch (err) {
+    alert('头像上传失败：' + err.message)
+  } finally {
+    uploadingAvatar.value = false
+  }
+}
 async function saveProfile() {
   if (signature.value.length > 50) {
     alert("签名不能超过50个字")
@@ -59,8 +101,11 @@ async function submitFeedback() {
   <main class="profile-page">
     <article class="profile-card">
       <!-- 头像：居中 -->
-      <figure class="avatar-section">
+      <figure class="avatar-section" @click="triggerUpload">
         <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
+        <input type="file" accept="image/*" @change="handleAvatarUpload" ref="fileInput" style="display: none" />
+        <div class="avatar-overlay" v-if="!uploadingAvatar">更换头像</div>
+        <div class="avatar-overlay" v-else>上传中...</div>
       </figure>
 
       <!-- 姓名：头像下面 -->
@@ -329,5 +374,35 @@ async function submitFeedback() {
 }
 .feedback-actions button:first-child:hover {
   background: var(--color-primary-dark);
+}
+
+/*头像样式*/
+.avatar-section {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  background: rgba(0,0,0,0.4);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: var(--font-size-small);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.avatar-section {
+  position: relative;
+  cursor: pointer;
+}
+.avatar-section:hover .avatar-overlay {
+  opacity: 1;
 }
 </style>
