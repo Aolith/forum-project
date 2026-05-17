@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue"
+import { ref, computed ,watch} from "vue"
 import { useRouter } from "vue-router"  // 用于跳转
 import { usePostsStore } from "@/stores/post"
 const postsStore = usePostsStore()
@@ -17,7 +17,7 @@ const categoryLabel = computed(() => {
     study: '学习交流',
     life: '校园生活',
     trade: '二手交易',
-    other: '树洞'
+    other: '表白墙'
   }
   return map[category.value] || '请选择分区'
 })
@@ -77,6 +77,14 @@ function reset() {
     title.value = ""
   }
 }
+
+watch(category, (newVal) => {
+  if (newVal === 'other') {
+    anonymous.value = true
+  } else {
+    anonymous.value = false
+  }
+})
 </script>
 
 <template>
@@ -90,7 +98,7 @@ function reset() {
       <li @click.stop="selectCategory('study')">学习交流</li>
       <li @click.stop="selectCategory('life')">校园生活</li>
       <li @click.stop="selectCategory('trade')">二手交易</li>
-      <li @click.stop="selectCategory('other')">树洞</li>
+      <li @click.stop="selectCategory('other')">表白墙</li>
       </ul>
     </div>
       <!-- 新增：匿名发布勾选框 -->

@@ -11,7 +11,7 @@ const tabs = [
   { key: 'study', label: '学习交流' },
   { key: 'life', label: '校园生活' },
   { key: 'trade', label: '二手交易' },
-  { key: 'other', label: '树洞' },
+  { key: 'other', label: '表白墙' },
 ]
 
 function switchCategory(key) {
