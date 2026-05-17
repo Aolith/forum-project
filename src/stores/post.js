@@ -155,8 +155,11 @@ export const usePostsStore = defineStore("post", () => {
   }
 
   //提交评论
-  async function addComment(postId, newComment) {
+  async function addComment(postId, body) {
     try {
+      const requestBody = typeof body === 'string' 
+        ? { comment: body } 
+        : body
       const res = await fetch(
         `/api/posts/${postId}/comments`,
         {
@@ -165,7 +168,7 @@ export const usePostsStore = defineStore("post", () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("forum-token")}`,
           },
-          body: JSON.stringify({ comment: newComment }),
+          body: JSON.stringify(requestBody),
         },
       )
       if (!res.ok) {

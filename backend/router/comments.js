@@ -9,7 +9,7 @@ const anonymizePost = require('../utils/anonymizePost')
 commentRouter.post('/', auth, async (req, res) => {
   try {
     const postId = req.params.postId
-    const { comment } = req.body
+    const { comment, replyTo, replyToCommentId } = req.body
     if (!comment) return res.status(400).json({ error: '评论内容不能为空' })
       // 过滤敏感词
     const result = filterSensitiveWords(comment)
@@ -25,7 +25,9 @@ commentRouter.post('/', auth, async (req, res) => {
     post.comments.push({
       comment: filteredComment,
       author: req.user._id,
-      anonymous: post.anonymous //跟随帖子的匿名设置
+      anonymous: post.anonymous, //跟随帖子的匿名设置
+      replyTo: replyTo || null,
+      replyToCommentId: replyToCommentId || null,
     })
     await post.save()
 
@@ -111,6 +113,33 @@ commentRouter.put('/:commentId', auth, async (req, res) => {
     return res.json(end)
   } catch (err) {
     console.error('编辑评论失败', err)
+    res.status(500).json({ error: '服务器内部错误' })
+  }
+})
+
+//点赞评论
+commentRouter.put('/:commentId/likes', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId)
+    if (!post) return res.status(404).json({ error: '帖子不存在' })
+
+    const comment = post.comments.id(req.params.commentId)
+    if (!comment) return res.status(404).json({ error: '评论不存在' })
+
+    if (comment.likedBy.includes(req.user._id)) {
+      return res.status(400).json({ error: '你已经点过赞了' })
+    }
+
+    comment.likes += 1
+    comment.likedBy.push(req.user._id)
+    await post.save()
+
+    await post.populate('author', 'name')
+    await post.populate('comments.author', 'name')
+    const result = anonymizePost(post)
+    res.json(result)
+  } catch (err) {
+    console.error('点赞评论失败', err)
     res.status(500).json({ error: '服务器内部错误' })
   }
 })

@@ -11,9 +11,7 @@ const postsStore = usePostsStore()
 const route = useRoute()
 const router = useRouter()
 const post = computed(() => postsStore.posts.find((p) => p._id === route.params.id))
-// 在 <script setup> 里，computed 下面
-console.log("route.path:", route.path)
-console.log("route.params:", route.params)
+const replyingTo = ref(null) // { commentId, authorName }
 function goHome() {
   router.back()
 }
@@ -92,6 +90,9 @@ async function reportPost() {
     alert('举报失败：' + err.message)
   }
 }
+function handleReply(commentId, authorId, authorName) {
+  replyingTo.value = { commentId, authorId, authorName }
+}
 </script>
 
 <template>
@@ -138,6 +139,8 @@ async function reportPost() {
         <CommentForm
           v-if="userStore.currentUser"
           :postId="post._id"
+          :replyingTo="replyingTo"
+          @cancel-reply="replyingTo = null"
         />
         <!-- 游客模式：整张卡片可点击，跳转登录页 -->
         <router-link to="/Login" v-else class="login-card">
@@ -155,6 +158,7 @@ async function reportPost() {
           :currentUserId="userStore.currentUser?._id"
           @delete-comment="handleDeleteComment"
           @save-comment="handleSaveComment"
+          @reply="handleReply"
         />
       </div>
 

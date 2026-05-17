@@ -19,6 +19,21 @@ const commentSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
+  //添加回复评论和点赞
+  likes: {
+    type: Number,
+    default: 0,
+  },
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  replyTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  replyToCommentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  }
 })
 
 // 2. 再定义帖子的主 Schema

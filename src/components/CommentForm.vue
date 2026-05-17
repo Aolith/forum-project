@@ -1,9 +1,10 @@
 <script setup>
 import { ref } from "vue"
 import { usePostsStore } from "@/stores/post"
-
+const emit = defineEmits(['cancel-reply'])
 const props = defineProps({
-  postId: String  // 帖子 ID，由父组件传入
+  postId: String,  // 帖子 ID，由父组件传入
+  replyingTo: Object, // { commentId, authorName } 或 null
 })
 
 const postsStore = usePostsStore()
@@ -16,13 +17,20 @@ async function submit() {
     return
   }
   
+  const body = { comment: commentText.value }
+  if (props.replyingTo) {
+    body.replyTo = props.replyingTo.authorId   
+    body.replyToCommentId = props.replyingTo.commentId
+  }
+
   submitting.value = true
   try {
-    await postsStore.addComment(props.postId, commentText.value)
-    commentText.value = ""  // 成功才清空
+    await postsStore.addComment(props.postId, body)
+    commentText.value = ""
+    // 提交完成后，告知父组件取消回复状态
+    emit('cancel-reply')
   } catch (err) {
     alert("评论失败：" + (err.message || "网络错误，请稍后重试"))
-    // 不清空输入框，让用户修改
   } finally {
     submitting.value = false
   }
@@ -32,6 +40,10 @@ async function submit() {
 <template>
   <div class="comment-form">
     <p class="form-label">评论区</p>
+    <div v-if="replyingTo" class="replying-bar">
+      <span>回复 @{{ replyingTo.authorName }}</span>
+      <button @click="$emit('cancel-reply')">取消</button>
+    </div>
     <textarea
       v-model="commentText"
       placeholder="写下你的想法..."
@@ -99,5 +111,28 @@ async function submit() {
   background: var(--color-primary-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-card-hover);
+}
+.replying-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-primary-light);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-small);
+  color: var(--color-primary);
+  margin-bottom: var(--space-xs);
+}
+.replying-bar button {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-small);
+  padding: 0;                  /* 加这行，去掉按钮默认内边距 */
+  line-height: 1;             /* 加这行，确保按钮文本垂直居中 */
+}
+.replying-bar button:hover {
+  color: #e74c3c;
 }
 </style>
