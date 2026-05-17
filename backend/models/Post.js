@@ -62,7 +62,7 @@ const postSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ['study', 'life', 'trade', 'other'],
+      enum: ['study', 'life', 'trade', 'lost','other'],
       default: 'other'
     },
     //匿名

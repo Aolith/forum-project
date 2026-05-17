@@ -11,6 +11,7 @@ const tabs = [
   { key: 'study', label: '学习交流' },
   { key: 'life', label: '校园生活' },
   { key: 'trade', label: '二手交易' },
+  { key: 'lost', label: '失物招领' },
   { key: 'other', label: '表白墙' },
 ]
 

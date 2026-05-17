@@ -17,6 +17,7 @@ const categoryLabel = computed(() => {
     study: '学习交流',
     life: '校园生活',
     trade: '二手交易',
+    lost: '失物招领',
     other: '表白墙'
   }
   return map[category.value] || '请选择分区'
@@ -98,6 +99,7 @@ watch(category, (newVal) => {
       <li @click.stop="selectCategory('study')">学习交流</li>
       <li @click.stop="selectCategory('life')">校园生活</li>
       <li @click.stop="selectCategory('trade')">二手交易</li>
+      <li @click.stop="selectCategory('lost')">失物招领</li>
       <li @click.stop="selectCategory('other')">表白墙</li>
       </ul>
     </div>
