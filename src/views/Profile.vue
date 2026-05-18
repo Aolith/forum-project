@@ -104,8 +104,7 @@ async function submitFeedback() {
       <figure class="avatar-section" @click="triggerUpload">
         <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
         <input type="file" accept="image/*" @change="handleAvatarUpload" ref="fileInput" style="display: none" />
-        <div class="avatar-overlay" v-if="!uploadingAvatar">更换头像</div>
-        <div class="avatar-overlay" v-else>上传中...</div>
+        <span class="avatar-hint">更换头像</span>
       </figure>
 
       <!-- 姓名：头像下面 -->
@@ -379,35 +378,35 @@ async function submitFeedback() {
 }
 
 /*头像样式*/
+
 .avatar-section {
   position: relative;
   cursor: pointer;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: var(--space-md);
 }
 
-.avatar-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
+.avatar-section img {
   width: 80px;
   height: 80px;
-  background: rgba(0,0,0,0.4);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--color-primary);
+}
+
+.avatar-hint {
+  margin-top: var(--space-xs);
   font-size: var(--font-size-small);
+  color: var(--color-primary-dark);
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
 
-.avatar-section:hover .avatar-overlay {
+.avatar-section:hover .avatar-hint {
   opacity: 1;
 }
-
 /* 微信号输入框 */
 .info-row input {
   padding: var(--space-xs) var(--space-sm);
