@@ -12,10 +12,12 @@ const route = useRoute()
 const router = useRouter()
 const post = computed(() => postsStore.posts.find((p) => p._id === route.params.id))
 const replyingTo = ref(null) // { commentId, authorName }
+
+const previewImageUrl = ref(null) // 用于图片预览的 URL
 function goHome() {
   router.back()
 }
-//
+
 //watch监听
 watch(
   () => post.value?.likes,
@@ -102,6 +104,10 @@ async function copyWechat(wechatId) {
     alert('复制失败，请手动复制：' + wechatId)
   }
 }
+//图片预览
+function showImagePreview(url) {
+  previewImageUrl.value = url
+}
 </script>
 
 <template>
@@ -128,9 +134,24 @@ async function copyWechat(wechatId) {
       <div v-else>
         <h2>{{ post.title }}</h2>
         <p class="post-content">{{ post.content }}</p>
-        <div v-if="post.images?.length" class="post-images">
-          <img v-for="(img, i) in post.images" :key="i" :src="img" class="post-img" />
+
+        <!-- 图片展示区域：固定尺寸 + 三列网格 + 居中 -->
+      <div v-if="post.images?.length" class="post-images-grid">
+        <div 
+          v-for="(img, i) in post.images" 
+          :key="i" 
+          class="post-image-item"
+          @click="showImagePreview(img)"
+        >
+          <img :src="img" :alt="'图片' + (i + 1)" />
         </div>
+      </div>
+
+      <!-- 图片放大弹窗 -->
+      <div v-if="previewImageUrl" class="image-preview-modal" @click="previewImageUrl = null">
+        <img :src="previewImageUrl" alt="预览图片" @click.stop />
+      </div>
+
         <div class="post-actions">
           <template v-if="post.author?._id === userStore.currentUser?._id">
             <button @click="updates(post._id, post.content)">编辑帖子</button>
@@ -385,23 +406,52 @@ textarea:focus {
 }
 
 /*图片预览*/
-.post-images {
-  display: flex;
-  gap: var(--space-xs);
-  flex-wrap: wrap;
-  justify-content: center;
+.post-images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
   margin-bottom: var(--space-md);
+  justify-items: center;
 }
-.post-img {
-  max-width: 200px;
-  max-height: 200px;
-  object-fit: cover;
+
+.post-image-item {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   cursor: pointer;
   transition: transform var(--transition-fast);
 }
-.post-img:hover {
-  transform: scale(1.05);
+
+.post-image-item:hover {
+  transform: scale(1.03);
+}
+
+.post-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 图片放大弹窗 */
+.image-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.image-preview-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
 }
 </style>

@@ -96,6 +96,11 @@ async function handleImages(e) {
 
   uploadingImages.value = true
   try {
+    // 限制最多 9 张图片
+    if (images.value.length + files.length > 9) {
+      alert('最多只能上传9张图片')
+      return
+    }
     for (const file of files) {
       const formData = new FormData()
       formData.append('image', file)
