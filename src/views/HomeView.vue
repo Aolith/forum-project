@@ -162,8 +162,8 @@ p {
 
 .category-tag {
   position: absolute;
-  top: 1px;
-  left: 2px;
+  top: -2px;
+  left: 1px;
   padding: 2px 8px;
   border-radius: 4px;
   color: var(--color-text-secondary);
