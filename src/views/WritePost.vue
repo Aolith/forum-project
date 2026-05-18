@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed ,watch} from "vue"
-import { useRouter } from "vue-router"  // 用于跳转
+import { useRouter } from "vue-router"
 import { usePostsStore } from "@/stores/post"
+import { compressImage } from '@/utils/compressImage'
 const postsStore = usePostsStore()
 const router = useRouter()
 
@@ -102,8 +103,9 @@ async function handleImages(e) {
       return
     }
     for (const file of files) {
+      const compressedFile = await compressImage(file)
       const formData = new FormData()
-      formData.append('image', file)
+      formData.append('image', compressedFile)
 
       const res = await fetch('/api/upload/image', {
         method: 'POST',

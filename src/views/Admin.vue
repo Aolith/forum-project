@@ -1,8 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue"
-import { useRouter } from "vue-router"
 
-const router = useRouter()
 const reports = ref([])
 const loading = ref(true)
 const page = ref(1)
