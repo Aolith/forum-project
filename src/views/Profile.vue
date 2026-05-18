@@ -34,6 +34,9 @@ async function handleAvatarUpload(e) {
 
     const res = await fetch('/api/upload/image', {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      },
       body: formData
     })
     const data = await res.json()
