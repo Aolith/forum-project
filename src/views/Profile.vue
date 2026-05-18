@@ -29,29 +29,17 @@ async function handleAvatarUpload(e) {
 
   uploadingAvatar.value = true
   try {
-    // 1. 从后端获取签名
-    const res = await fetch('/api/upload/upload-signature')
-    const { timestamp, signature: uploadSignature, cloudName } = await res.json()
-
-    // 2. 构建 FormData，直传 Cloudinary
     const formData = new FormData()
-    formData.append('file', file)
-    formData.append('api_key', '964427695737617') 
-    formData.append('timestamp', timestamp)
-    formData.append('signature', uploadSignature)
-    formData.append('folder', 'forum/avatars')
+    formData.append('image', file)
 
-    const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    const res = await fetch('/api/upload/image', {
       method: 'POST',
       body: formData
     })
-    const data = await uploadRes.json()
-    console.log('Cloudinary 返回:', data)
+    const data = await res.json()
+    if (!data.url) throw new Error('上传失败')
 
-    if (!data.secure_url) throw new Error('上传失败')
-
-    // 3. 更新用户头像
-    await userStore.updateProfile({ avatar: data.secure_url })
+    await userStore.updateProfile({ avatar: data.url })
     alert('头像更新成功！')
   } catch (err) {
     alert('头像上传失败：' + err.message)

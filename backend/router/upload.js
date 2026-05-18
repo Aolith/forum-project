@@ -1,20 +1,35 @@
 const express = require('express')
-const cloudinary = require('cloudinary').v2
+const COS = require('cos-nodejs-sdk-v5')
+const multer = require('multer')
 const router = express.Router()
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+const cos = new COS({
+  SecretId: process.env.COS_SECRET_ID,
+  SecretKey: process.env.COS_SECRET_KEY
 })
 
-router.get('/upload-signature', (req, res) => {
-  const timestamp = Math.round(new Date().getTime() / 1000)
-  const signature = cloudinary.utils.api_sign_request(
-    { timestamp, folder: 'forum/avatars' }, 
-    process.env.CLOUDINARY_API_SECRET
-  )
-  res.json({ timestamp, signature: signature, cloudName: process.env.CLOUDINARY_CLOUD_NAME })
+const upload = multer({ storage: multer.memoryStorage() })
+
+router.post('/image', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: '没有图片数据' })
+
+    const fileName = `avatars/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`
+
+    const result = await cos.putObject({
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.COS_REGION,
+      Key: fileName,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype
+    })
+
+    const url = `https://${process.env.COS_BUCKET}.cos.${process.env.COS_REGION}.myqcloud.com/${fileName}`
+    res.json({ url })
+  } catch (err) {
+    console.error('图片上传失败', err)
+    res.status(500).json({ error: '上传失败' })
+  }
 })
 
 module.exports = router
