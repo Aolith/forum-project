@@ -14,7 +14,16 @@ const tabs = [
   { key: 'lost', label: '失物招领' },
   { key: 'other', label: '表白墙' },
 ]
-
+function getCategoryLabel(category) {
+  const map = {
+    study: '学习交流',
+    life: '校园生活',
+    trade: '二手交易',
+    lost: '失物招领',
+    other: '表白墙'
+  }
+  return map[category] || category
+}
 function switchCategory(key) {
   currentCategory.value = key
   postsStore.resetPage()
@@ -60,9 +69,14 @@ onUnmounted(() => {
       </button>
     </div>
     <div v-for="post in postsStore.posts" :key="post._id" class="post">
+      <span v-if="currentCategory === 'hot'" class="category-tag">{{
+        getCategoryLabel(post.category)
+      }}</span>
       <router-link :to="'/post/' + post._id" class="post-link">
-        <h2>{{ post.title }}</h2>
-        <p class="likes">👍 {{ post.likes }}</p>
+        <h2>
+          {{ post.title }}
+        </h2>
+        <p class="likes">❤️ {{ post.likes }}</p>
         <p class="comment-count">💬 {{ post.comments.length }}</p>
         <p class="author">{{ post.author?.name }}</p>
       </router-link>
@@ -95,6 +109,7 @@ p {
 
 /* -------------------- 帖子卡片 -------------------- */
 .post {
+  position: relative;  /* 确保绝对定位相对于卡片 */
   background-color: var(--color-surface); /* 白色，不动 */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -145,6 +160,18 @@ p {
   display: block; /* 让整个卡片可点击 */
 }
 
+.category-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  z-index: 1;
+  opacity: 0.85;
+}
 /* -------------------- 分类导航 -------------------- */
 .category-nav {
   display: flex;

@@ -19,7 +19,10 @@ const fileInput = ref(null)
 const wechat = ref(userStore.currentUser?.wechat || '')
 const showWechat = ref(userStore.currentUser?.showWechat || false)
 
+
+
 function triggerUpload() {
+  if (uploadingAvatar.value) return
   fileInput.value.click()
 }
 
@@ -101,10 +104,10 @@ async function submitFeedback() {
   <main class="profile-page">
     <article class="profile-card">
       <!-- 头像：居中 -->
-      <figure class="avatar-section" @click="triggerUpload">
+      <figure class="avatar-section"  @click="!uploadingAvatar && triggerUpload()">
         <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
         <input type="file" accept="image/*" @change="handleAvatarUpload" ref="fileInput" style="display: none" />
-        <span class="avatar-hint">更换头像</span>
+        <span class="avatar-hint">{{ uploadingAvatar ? '更换中...' : '更换头像' }}</span>
       </figure>
 
       <!-- 姓名：头像下面 -->
