@@ -47,7 +47,7 @@ export const usePostsStore = defineStore("post", () => {
   // 添加帖子的方法
 
   let isAddingPost = false
-  async function addPost(content, title, category,anonymous) {
+  async function addPost(content, title, category,anonymous,images) {
     if (isAddingPost) return// 防止重复提交
     isAddingPost = true
     try {
@@ -57,7 +57,7 @@ export const usePostsStore = defineStore("post", () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("forum-token")}`,
         },
-        body: JSON.stringify({ content, title,category,anonymous }), // 只传 content，因为 title 后端固定
+        body: JSON.stringify({ content, title,category,anonymous,images }), // 只传 content，因为 title 后端固定
       })
       if (!res.ok) {
         const errorData = await res.json()

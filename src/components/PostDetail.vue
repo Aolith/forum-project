@@ -128,6 +128,9 @@ async function copyWechat(wechatId) {
       <div v-else>
         <h2>{{ post.title }}</h2>
         <p class="post-content">{{ post.content }}</p>
+        <div v-if="post.images?.length" class="post-images">
+          <img v-for="(img, i) in post.images" :key="i" :src="img" class="post-img" />
+        </div>
         <div class="post-actions">
           <template v-if="post.author?._id === userStore.currentUser?._id">
             <button @click="updates(post._id, post.content)">编辑帖子</button>
@@ -379,5 +382,26 @@ textarea:focus {
 }
 .btn-wechat-copy:hover {
   background: #06ad56;
+}
+
+/*图片预览*/
+.post-images {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+.post-img {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+.post-img:hover {
+  transform: scale(1.05);
 }
 </style>

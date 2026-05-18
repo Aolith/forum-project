@@ -75,6 +75,8 @@ const postSchema = new mongoose.Schema(
       enum: ['normal', 'reported'],
       default: 'normal'
     },
+    //图片
+    images: [{ type: String }],
     comments: [commentSchema], // 这里引用上面定义的评论 Schema
   },
   {

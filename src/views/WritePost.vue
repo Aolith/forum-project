@@ -9,6 +9,7 @@ const title = ref("")
 const content = ref("")
 const category = ref("")
 const anonymous = ref(false)
+const images = ref([]) 
 const showDropdown = ref(false)
 
 
@@ -43,14 +44,14 @@ async function submit() {
   }
   submitting.value = true               // 开始提交，按钮禁用
   try {
-    await postsStore.addPost(content.value, title.value, category.value, anonymous.value)  // 等待后端返回
+    await postsStore.addPost(content.value, title.value, category.value, anonymous.value, images.value)  // 等待后端返回
     
     // === 发帖成功 ===
     content.value = ""                  // 清空输入框
     title.value = ""
     category.value = ""
     anonymous.value = false
-
+    images.value = []
     // 弹出成功卡片
     showSuccessCard.value = true
     countdown.value = 2
@@ -86,6 +87,46 @@ watch(category, (newVal) => {
     anonymous.value = false
   }
 })
+//图片处理
+const uploadingImages = ref(false)
+
+async function handleImages(e) {
+  const files = Array.from(e.target.files)
+  if (files.length === 0) return
+
+  uploadingImages.value = true
+  try {
+    for (const file of files) {
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const res = await fetch('/api/upload/image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+        },
+        body: formData
+      })
+      const data = await res.json()
+      if (!data.url) throw new Error('上传失败')
+      images.value.push(data.url)
+    }
+  } catch (err) {
+    alert('图片上传失败：' + err.message)
+  } finally {
+    uploadingImages.value = false
+  }
+}
+
+
+// 图片预览和删除
+function previewImage(url) {
+  window.open(url, '_blank')
+}
+
+function removeImage(index) {
+  images.value.splice(index, 1)
+}
 </script>
 
 <template>
@@ -112,6 +153,20 @@ watch(category, (newVal) => {
 
       <label class="form-label">帖子内容</label>
       <textarea v-model="content" class="content-input" placeholder="分享你的想法..."></textarea>
+
+      <label class="form-label">图片（可选）</label>
+      <div class="image-upload-area">
+        <label class="image-upload-label">
+        选择图片
+        <input type="file" accept="image/*" multiple @change="handleImages" style="display: none" />
+        </label>
+      </div>
+      <div v-if="images.length" class="image-preview">
+        <div v-for="(url, i) in images" :key="i" class="preview-img-wrapper" @click="previewImage(url)">
+          <img :src="url" alt="预览图片" />
+          <button class="preview-remove" @click.stop="removeImage(i)">✕</button>
+        </div>
+      </div>
 
       <div class="form-actions">
         <button 
@@ -366,5 +421,78 @@ input[type="checkbox"]:checked::after {
   color: white;
   font-size: 12px;
   font-weight: bold;
+}
+/* 图片上传区域 */
+.image-upload-area {
+  margin-top: var(--space-sm);
+}
+
+.image-upload-label {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.image-upload-label:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.image-preview {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}
+
+.preview-img-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.preview-img-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.preview-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.preview-img-wrapper:hover .preview-remove {
+  opacity: 1;
 }
 </style>

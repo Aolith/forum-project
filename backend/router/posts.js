@@ -60,7 +60,7 @@ postRouter.get('/', async (req, res) => {
 postRouter.post('/', auth, async (req, res) => {
   try {
     //从请求体拿到前端发来的数据
-    const { content, title, category, anonymous } = req.body
+    const { content, title, category, anonymous, images } = req.body
     //简单检验
     if (!title) {
       return res.status(400).json({ error: '标题不能为空' })
@@ -89,6 +89,7 @@ postRouter.post('/', auth, async (req, res) => {
       author: req.user._id, //从 token 里拿的当前用户 _id
       likes: 0,
       comments: [],
+      images: images || []
     }
     //增加数据文档
     let createdPost = await Post.create(newPost)
