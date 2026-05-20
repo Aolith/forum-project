@@ -45,8 +45,12 @@ async function handleAvatarUpload(e) {
     const data = await res.json()
     if (!data.url) throw new Error('上传失败')
 
-    await userStore.updateProfile({ avatar: data.url })
-    alert('头像更新成功！')
+    const result = await userStore.updateProfile({ avatar: data.url })
+    if (result.success) {
+      alert('头像更新成功！')
+    } else {
+      alert(result.msg)  // "头像每月只能更改3次"
+    }
   } catch (err) {
     alert('头像上传失败：' + err.message)
   } finally {

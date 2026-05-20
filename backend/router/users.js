@@ -125,7 +125,7 @@ userRouter.put('/profile', auth, async (req, res) => {
     if (wechat !== undefined) user.wechat = wechat
     if (showWechat !== undefined) user.showWechat = showWechat
     await user.save()
-    res.json({ user: { _id: user._id, sno: user.sno, name: user.name, signature: user.signature, avatar: user.avatar, avatarVersion: user.avatarVersion, wechat: user.wechat, showWechat: user.showWechat } })
+    res.json({ user: { _id: user._id, sno: user.sno, name: user.name, signature: user.signature, avatar: user.avatar,avatarCount: user.avatarCount, avatarMonth: user.avatarMonth,avatarVersion: user.avatarVersion, wechat: user.wechat, showWechat: user.showWechat } })
   } catch (err) {
     console.error('更新个人资料失败', err)
     res.status(500).json({ error: '服务器内部错误' })
