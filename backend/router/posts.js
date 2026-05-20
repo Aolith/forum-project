@@ -34,7 +34,8 @@ postRouter.get('/', async (req, res) => {
       ])
     posts = await Post.populate(posts, [
     { path: 'author', select: 'name wechat showWechat' }, 
-    { path: 'comments.author', select: 'name' }
+    { path: 'comments.author', select: 'name' },
+    { path: 'comments.replyTo', select: 'name' }
     ])
     const result = posts.map(post => anonymizePost(post))
     res.json(result)
@@ -43,6 +44,7 @@ postRouter.get('/', async (req, res) => {
       posts = await Post.find(filter)
         .populate('author', 'name wechat showWechat') 
         .populate('comments.author', 'name')
+        .populate('comments.replyTo', 'name')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -153,6 +155,7 @@ postRouter.put('/:id', auth, async (req, res) => {
     updatedPost = await Post.findById(updatedPost._id)
       .populate('author', 'name wechat showWechat')
       .populate('comments.author', 'name')
+      .populate('comments.replyTo', 'name')
     const result = anonymizePost(updatedPost) 
     res.json(result)  
   } catch (err) {
@@ -181,7 +184,8 @@ postRouter.put('/:id/likes', auth, async (req, res) => {
     await post.save()
     await post.populate('author', 'name wechat showWechat')
     await post.populate('comments.author', 'name')
-     // 匿名处理
+    await post.populate('comments.replyTo', 'name')
+    // 匿名处理
     const result = anonymizePost(post)
     return res.json(result)
   } catch (err) {

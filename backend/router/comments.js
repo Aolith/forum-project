@@ -70,6 +70,7 @@ commentRouter.delete('/:commentId', auth, async (req, res) => {
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
+    await post.populate('comments.replyTo', 'name')
     // 匿名处理
     const end = anonymizePost(post)
     return res.json(end)
@@ -109,6 +110,7 @@ commentRouter.put('/:commentId', auth, async (req, res) => {
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
+    await post.populate('comments.replyTo', 'name')
     // 匿名处理
     const end = anonymizePost(post)
     return res.json(end)
@@ -137,6 +139,7 @@ commentRouter.put('/:commentId/likes', auth, async (req, res) => {
 
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
+    await post.populate('comments.replyTo', 'name')
     const result = anonymizePost(post)
     res.json(result)
   } catch (err) {
