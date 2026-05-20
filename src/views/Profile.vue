@@ -105,7 +105,7 @@ async function submitFeedback() {
     <article class="profile-card">
       <!-- 头像：居中 -->
       <figure class="avatar-section"  @click="!uploadingAvatar && triggerUpload()">
-        <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
+        <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像" />
         <input type="file" accept="image/*" @change="handleAvatarUpload" ref="fileInput" style="display: none" />
         <span class="avatar-hint">{{ uploadingAvatar ? '更换中...' : '更换头像' }}</span>
       </figure>

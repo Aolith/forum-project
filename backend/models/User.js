@@ -28,6 +28,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: ''
     },
+    avatarCount: {
+      type: Number,
+      default: 0
+    },
+    avatarMonth: {
+      type: Number,
+      default: 0
+    },
+    avatarVersion: {
+      type: Number,
+      default: 1
+    },
     wechat: {
       type: String,
       default: ''

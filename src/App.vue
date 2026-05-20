@@ -11,7 +11,7 @@
       <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
         <template v-if="userStore.currentUser">
           <router-link to="/profile" class="nav-avatar">
-            <img :src="userStore.currentUser?.avatar || '/default-avatar.png'" alt="头像" />
+            <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像" />
           </router-link>
         </template>
         <template v-else>

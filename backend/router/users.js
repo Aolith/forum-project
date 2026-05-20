@@ -103,11 +103,29 @@ userRouter.put('/profile', auth, async (req, res) => {
       return res.status(400).json({ error: '微信号不能超过20个字' })
     }
     if (signature !== undefined) user.signature = signature
-    if (avatar !== undefined) user.avatar = avatar
+    if (avatar !== undefined) {
+      const now = new Date()
+      const currentMonth = now.getMonth() + 1  // getMonth() 返回 0-11，所以要 +1
+
+      // 跨月重置计数
+      if (user.avatarMonth !== currentMonth) {
+        user.avatarCount = 0
+        user.avatarMonth = currentMonth
+      }
+
+      // 每月最多 3 次
+      if (user.avatarCount >= 3) {
+        return res.status(400).json({ error: '头像每月只能更改3次' })
+      }
+
+      user.avatar = avatar
+      user.avatarCount += 1
+      user.avatarVersion = (user.avatarVersion || 1) + 1
+    }
     if (wechat !== undefined) user.wechat = wechat
     if (showWechat !== undefined) user.showWechat = showWechat
     await user.save()
-    res.json({ user: { _id: user._id, sno: user.sno, name: user.name, signature: user.signature, avatar: user.avatar, wechat: user.wechat, showWechat: user.showWechat } })
+    res.json({ user: { _id: user._id, sno: user.sno, name: user.name, signature: user.signature, avatar: user.avatar, avatarVersion: user.avatarVersion, wechat: user.wechat, showWechat: user.showWechat } })
   } catch (err) {
     console.error('更新个人资料失败', err)
     res.status(500).json({ error: '服务器内部错误' })
