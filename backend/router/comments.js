@@ -34,6 +34,7 @@ commentRouter.post('/', auth, async (req, res) => {
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
+    await post.populate('comments.replyTo', 'name')
     // 匿名处理
     const end = anonymizePost(post)
     return res.json(end)
