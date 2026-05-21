@@ -1,10 +1,12 @@
 <script setup>
-import { ref,computed } from "vue"
+import { ref,computed} from "vue"
 import { usePostsStore } from "@/stores/post"
 
 const postsStore = usePostsStore()
 const editingId = ref(null)
 const editText = ref("")
+const showAllReplies = ref(false)
+const replyKey = ref(0)
 
 const props = defineProps({
   comment: Object,
@@ -12,9 +14,20 @@ const props = defineProps({
   postId: String,
   postAuthorId: String,
   currentUserId: String,
+  forceCollapse: { type: Boolean, default: false } ,
 })
 
 const emit = defineEmits(["delete-comment", "save-comment", "reply"])
+
+// 递归计算某个评论下所有子回复的总数（包括所有嵌套层级）
+function getTotalReplyCount(comment) {
+  if (!comment.children || comment.children.length === 0) return 0
+  let count = comment.children.length
+  for (const child of comment.children) {
+    count += getTotalReplyCount(child)
+  }
+  return count
+}
 
 const hasLikedComment = computed(() => {
   return props.comment.likedBy?.includes(props.currentUserId)
@@ -52,6 +65,7 @@ async function save() {
     await postsStore.saveComment(props.postId, editingId.value, editText.value)
     editText.value = ""
     editingId.value = null
+    showAllReplies.value = false
   } catch (err) {
     alert("编辑失败：" + (err.message || "网络错误，请稍后重试"))
   }
@@ -78,7 +92,7 @@ async function likeComment(commentId) {
     postsStore.posts = postsStore.posts.map(p => 
       p._id === updatedPost._id ? updatedPost : p
     )
-  
+    showAllReplies.value = false
   } catch (err) {
     alert(err.message)
   }
@@ -99,56 +113,91 @@ async function likeComment(commentId) {
 
       <!-- 正常展示模式 -->
       <div v-else>
-      <div class="comment-header">
-        <span class="comment-author">{{ comment.author?.name || '匿名用户' }}</span>
-        <div v-if="canEdit(comment) || canDelete(comment)" class="comment-header-actions">
-          <button v-if="canEdit(comment)" @click="update(comment._id, comment.comment)" class="btn-sm btn-edit">编辑</button>
-          <button v-if="canDelete(comment)" @click="deletes(comment._id)" class="btn-sm btn-delete">删除</button>
+        <div class="comment-header">
+          <span class="comment-author">{{ comment.author?.name || '匿名用户' }}</span>
+          <div v-if="canEdit(comment) || canDelete(comment)" class="comment-header-actions">
+            <button v-if="canEdit(comment)" @click="update(comment._id, comment.comment)" class="btn-sm btn-edit">编辑</button>
+            <button v-if="canDelete(comment)" @click="deletes(comment._id)" class="btn-sm btn-delete">删除</button>
+          </div>
         </div>
-      </div>
         <p class="comment-body">
           <span v-if="comment.replyTo" class="reply-hint">回复 @{{ comment.replyTo?.name }}</span>
           {{ comment.comment }}
         </p>
         <div class="comment-footer">
           <span class="comment-time">{{ formatTime(comment.time) }}</span>
-          <!-- 已点赞：红心 + 数字 -->
-          <span v-if="hasLikedComment" class="liked-count">
-          ❤️{{ comment.likes || 0 }}
-          </span>
-
-        <!-- 未点赞：空心点赞按钮 -->
-          <button 
-            v-else 
-            @click="likeComment(comment._id)" 
-            class="btn-sm btn-like-comment"
-          >
-          🤍{{ comment.likes || 0 }}
-          </button>
+          <span v-if="hasLikedComment" class="liked-count">❤️{{ comment.likes || 0 }}</span>
+          <button v-else @click="likeComment(comment._id)" class="btn-sm btn-like-comment">🤍{{ comment.likes || 0 }}</button>
           <button v-if="currentUserId" @click="$emit('reply', comment._id, comment.author?._id, comment.author?.name)" class="btn-sm btn-reply">回复</button>
         </div>
       </div>
     </div>
 
-    <!-- 子回复：用 ul > li 包裹，形成整齐的回复区域 -->
-    <ul  v-if="comment.children && comment.children.length > 0" class="reply-list" :style="{ paddingLeft: depth === 0 ? '20px' : '0' }">
-      <li v-for="child in comment.children" :key="child._id">
-        <CommentItem
-          :comment="child"
-          :depth="1"
-          :postId="postId"
-          :postAuthorId="postAuthorId"
-          :currentUserId="currentUserId"
-          @delete-comment="$emit('delete-comment', $event)"
-          @save-comment="(commentText, commentId) => emit('save-comment', commentText, commentId)"
-          @reply="(commentId, authorId, authorName) => emit('reply', commentId, authorId, authorName)"
-        />
-      </li>
-    </ul>
+    <!-- 子回复区域：使用 v-if 直接控制渲染，彻底消除深层折叠问题 -->
+    <template v-if="!forceCollapse && comment.children && comment.children.length > 0">
+      <ul class="reply-list" :style="{ paddingLeft: depth === 0 ? '20px' : '0' }" :key="replyKey">
+        <!-- 一级评论折叠状态：只渲染最后一条 -->
+        <template v-if="depth === 0 && !showAllReplies && getTotalReplyCount(comment) > 1">
+          <li :key="comment.children[comment.children.length - 1]._id">
+            <CommentItem
+              :comment="comment.children[comment.children.length - 1]"
+              :depth="1"
+              :postId="postId"
+              :postAuthorId="postAuthorId"
+              :currentUserId="currentUserId"
+              :forceCollapse="true"
+              @delete-comment="$emit('delete-comment', $event)"
+              @save-comment="(commentText, commentId) => emit('save-comment', commentText, commentId)"
+              @reply="(commentId, authorId, authorName) => emit('reply', commentId, authorId, authorName)"
+            />
+          </li>
+        </template>
+        <!-- 其他情况：渲染全部子回复 -->
+        <template v-else>
+          <li v-for="child in comment.children" :key="child._id">
+            <CommentItem
+              :comment="child"
+              :depth="1"
+              :postId="postId"
+              :postAuthorId="postAuthorId"
+              :currentUserId="currentUserId"
+              :forceCollapse="false"
+              @delete-comment="$emit('delete-comment', $event)"
+              @save-comment="(commentText, commentId) => emit('save-comment', commentText, commentId)"
+              @reply="(commentId, authorId, authorName) => emit('reply', commentId, authorId, authorName)"
+            />
+          </li>
+        </template>
+      </ul>
+      <!-- 展开/收起按钮 -->
+      <button 
+        v-if="depth === 0 && getTotalReplyCount(comment) > 1"
+        @click="showAllReplies = !showAllReplies; editingId = null; replyKey++"
+        class="btn-toggle-replies"
+      >
+        {{ showAllReplies ? '收起回复' : `展开 ${getTotalReplyCount(comment) - 1} 条回复` }}
+      </button>
+    </template>
   </div>
 </template>
 
 <style scoped>
+/* 回复折叠/展开按钮样式 */
+.btn-toggle-replies {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  padding: var(--space-xs) 0;
+  margin-left: 20px;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-toggle-replies:hover {
+  opacity: 1;
+}
 
 .comment-card {
   background-color: var(--color-bg);
