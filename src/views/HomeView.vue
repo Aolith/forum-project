@@ -24,6 +24,11 @@ function getCategoryLabel(category) {
   }
   return map[category] || category
 }
+// 格式化时间显示
+function formatTime(time) {
+  const d = new Date(time)
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`
+}
 function switchCategory(key) {
   currentCategory.value = key
   postsStore.resetPage()
@@ -79,6 +84,7 @@ onUnmounted(() => {
         <p class="likes">❤️ {{ post.likes }}</p>
         <p class="comment-count">💬 {{ post.comments.length }}</p>
         <p class="author">{{ post.author?.name }}</p>
+        <p class="time">{{ formatTime(post.createdAt) }}</p>
       </router-link>
     </div>
   </div>
@@ -146,7 +152,14 @@ p {
   color: var(--color-text-secondary);
   margin-top: var(--space-sm);
 }
-
+/* 时间：右下角，不显眼 */
+.post .time {
+  text-align: right;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  opacity: 0.5;
+  margin-top: 2px;
+}
 /* 评论数 */
 .post .comment-count {
   text-align: center;
