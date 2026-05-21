@@ -2,7 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination":"https://forum-project-ebbl.onrender.com/api/:path*"
+      "destination": "https://forum-project-ebbl.onrender.com/api/:path*"
+    },
+    {
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
     }
   ]
 }
