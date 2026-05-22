@@ -7,8 +7,12 @@
         <router-link to="/write">写帖子</router-link>
       </div>
 
-  <!-- 右侧：用户操作 + 主题切换 包在一起 -->
+  <!-- 右侧：用户主页和消息提醒 包在一起 -->
       <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+        <router-link to="/notifications" class="notification-icon">
+          <img src="/notification-bell.svg" alt="通知" />
+          <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
+        </router-link>
         <template v-if="userStore.currentUser">
           <router-link to="/profile" class="nav-avatar">
             <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像" />
@@ -100,5 +104,28 @@ nav button:hover {
 
 .nav-avatar img:hover {
   border-color: var(--color-primary);
+}
+/*消息提醒图标 */
+.notification-icon {
+  position: relative;
+  margin-right: 12px;
+}
+.notification-icon img {
+  width: 30px;
+  height: 30px;
+}
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
