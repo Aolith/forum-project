@@ -2,7 +2,9 @@
 import { ref } from "vue"
 import { useRouter,useRoute } from "vue-router"
 import { useUserStore } from "@/stores/user"
+import { useThemeStore } from '@/stores/theme'
 
+const themeStore = useThemeStore()
 const userStore = useUserStore()
 const router = useRouter()
 const route = useRoute()
@@ -167,7 +169,7 @@ async function submitFeedback() {
       </div>
       <!-- 管理后台 -->
       <router-link v-if="userStore.currentUser?.role === 'admin'" to="/admin" class="btn-admin">管理后台</router-link>
-
+      <button class="btn-theme" @click="themeStore.toggleTheme">切换主题</button>
       <!-- 操作按钮 -->
       <footer class="actions">
         <button v-if="editing" class="btn-save" @click="saveProfile">保存</button>
@@ -481,5 +483,21 @@ async function submitFeedback() {
   text-align: center;
   margin-top: 2px;
   margin-bottom: var(--space-xs);
+}
+/*切换主题按钮*/
+.btn-theme {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: var(--space-sm);
+}
+.btn-theme:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 </style>
