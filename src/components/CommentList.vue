@@ -40,7 +40,6 @@ const nestedComments = computed(() => {
     :postId="postId"
     :postAuthorId="postAuthorId"
     :currentUserId="currentUserId"
-    :forceCollapse="forceCollapse || (depth === 0 && !showAllReplies)"
     @delete-comment="$emit('delete-comment', $event)"
     @save-comment="(commentText, commentId) => emit('save-comment', commentText, commentId)"
     @reply="(commentId, authorId, authorName) => emit('reply', commentId, authorId, authorName)"
