@@ -8,6 +8,7 @@ const userStore = useUserStore()
 const nameId = ref("")
 const snoId = ref("")
 const numId = ref("")
+const confirmPassword = ref("")
 
 // 正则
 function validateSno(s) {
@@ -24,12 +25,20 @@ function goLogin() {
 }
 
 async function handleRegister() {
+  if (!nameId.value || !snoId.value || !numId.value || !confirmPassword.value) {
+    alert("所有字段都不能为空!")
+    return
+  }
   if (!validateSno(snoId.value)) {
     alert("学号必须是10位数字")
     return
   }
   if (!validatePassword(numId.value)) {
     alert("密码必须包含字母和数字,长度8-16位")
+    return
+  }
+  if (numId.value !== confirmPassword.value) {
+    alert("两次输入的密码不一致")
     return
   }
   // 验证完成添加新用户
@@ -54,6 +63,13 @@ async function handleRegister() {
           v-model="numId"
           type="password"
           placeholder="密码（8-16位，包含字母和数字）"
+          class="auth-input"
+          autocomplete="new-password"
+        />
+        <input
+          v-model="confirmPassword"
+          type="password"
+          placeholder="再次输入密码"
           class="auth-input"
           autocomplete="new-password"
         />
