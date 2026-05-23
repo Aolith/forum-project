@@ -41,7 +41,9 @@ async function fetchNotifications() {
 async function handleClick(notification) {
   if (!notification.postId) return
 
-  // 先标记已读，但不立即减少未读数
+  const wasUnread = !notification.isRead  // 在修改前保存原始未读状态
+
+  // 标记已读
   if (!notification.isRead) {
     try {
       const res = await fetch(`/api/notifications/${notification._id}/read`, {
@@ -67,15 +69,13 @@ async function handleClick(notification) {
     })
 
     if (check.ok) {
-      // 帖子存在：减少未读数 + 跳转
-      decreaseUnreadCount()
+      // 帖子存在 → 减未读数（如果原本未读）并跳转
+      if (wasUnread) decreaseUnreadCount()
       router.push(`/post/${notification.postId}`)
     } else if (check.status === 404) {
-      // 帖子不存在：删除通知并减少未读数
+      // 帖子不存在 → 删除通知
       notifications.value = notifications.value.filter(n => n._id !== notification._id)
-      if (!notification.isRead) {
-        decreaseUnreadCount()
-      }
+      if (wasUnread) decreaseUnreadCount()
       alert('该帖子已被删除或不存在')
     } else {
       alert('该帖子暂时无法访问')

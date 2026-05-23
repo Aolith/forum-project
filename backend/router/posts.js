@@ -59,6 +59,26 @@ postRouter.get('/', async (req, res) => {
   }
 })
 
+// 获取单个帖子（用于详情页和 HEAD 检查）
+postRouter.get('/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('author', 'name wechat showWechat')
+      .populate('comments.author', 'name')
+      .populate('comments.replyTo', 'name')
+
+    if (!post) {
+      return res.status(404).json({ error: '帖子不存在' })
+    }
+
+    const result = anonymizePost(post)
+    res.json(result)
+  } catch (err) {
+    console.error('获取帖子详情失败', err)
+    res.status(500).json({ error: '服务器内部错误' })
+  }
+})
+
 //添加新帖子
 postRouter.post('/', auth, async (req, res) => {
   try {
