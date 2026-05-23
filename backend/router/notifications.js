@@ -6,7 +6,7 @@ const Notification = require('../models/Notification') //引入通知模型
 //返回通知列表,倒序排列
 notificationRouter.get('/',auth,async(req,res)=>{
   try{
-    const notifications=await Notification.find({user:req.user._id})
+    const notifications=await Notification.find({receiver:req.user._id})
       .populate('sender', 'name')
       .sort({createdAt:-1})
     res.json(notifications)
@@ -18,7 +18,7 @@ notificationRouter.get('/',auth,async(req,res)=>{
 //返回未读通知的数量
 notificationRouter.get('/unread-count',auth,async(req,res)=>{
   try{
-    const count=await Notification.countDocuments({user:req.user._id,isRead:false})
+    const count=await Notification.countDocuments({receiver:req.user._id,isRead:false})
     res.json({count})
   }catch(err){
     console.error('获取未读通知数量失败',err)
@@ -26,7 +26,7 @@ notificationRouter.get('/unread-count',auth,async(req,res)=>{
   }
 })
 //把通知标记为已读
-notificationRouter.put('/read',auth,async(req,res)=>{
+notificationRouter.put('/:id/read',auth,async(req,res)=>{
   try{
     const notification=await Notification.findOneAndUpdate(
       {_id:req.params.id,receiver:req.user._id},
