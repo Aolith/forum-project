@@ -76,6 +76,10 @@ app.use('/api/feedback', feedbackRouter)
 //引入upload路由
 app.use('/api/upload', require('./router/upload'))
 
+//引入notifications路由
+const notificationsRouter = require('./router/notifications')
+app.use('/api/notifications', notificationsRouter)
+
 //在指定端口启动服务器
 app.listen(port, () => {
   console.log(`服务器在${port}端口启动成功`)
