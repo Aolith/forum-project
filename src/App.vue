@@ -15,7 +15,7 @@
             <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount>99?'99+' : unreadCount }}</span>
           </router-link>
           <router-link to="/Profile" class="nav-avatar">
-            <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像" />
+            <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像"  @error="e => e.target.src = '/default-avatar.png'" />
           </router-link>
         </template>
         <template v-else>
@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, watch } from "vue"
 import { useThemeStore } from "@/stores/theme"
 import { useUserStore } from "./stores/user"
 const themeStore = useThemeStore()
@@ -41,33 +41,63 @@ const userStore = useUserStore()
 const unreadCount = ref(0)
 //消息通知查询函数
 async function fetchNotifications() {
- try{
-    const res = await fetch("/api/notifications/unread-count",{
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
-      }
+  try {
+    const res = await fetch('/api/notifications/unread-count', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
     })
-    
+
     if (res.ok) {
+      // 正常返回，更新计数
       const data = await res.json()
       unreadCount.value = data.count
+      localStorage.setItem('unread-count', data.count)
+    } else if (res.status === 401 || res.status === 403) {
+      // 认证失败，直接清零（token 过期或无效）
+      unreadCount.value = 0
+      localStorage.removeItem('unread-count')
+    } else {
+      // 其他接口错误（如 500），用缓存兜底
+      const cached = localStorage.getItem('unread-count')
+      if (cached !== null) {
+        unreadCount.value = parseInt(cached) || 0
+      }
     }
- }catch (err) {
-    //静默失败
- }
+  } catch (err) {
+    // 网络错误，用缓存兜底
+    const cached = localStorage.getItem('unread-count')
+    if (cached !== null) {
+      unreadCount.value = parseInt(cached) || 0
+    }
+  }
+}
+//每10秒查询一次消息通知
+
+let timer = null
+
+function startPolling() {
+  if (timer) return
+  fetchNotifications() // 立即拉一次
+  timer = setInterval(fetchNotifications, 10000)
 }
 
-//每30秒查询一次消息通知
-onMounted(() => {
-  setInterval(() => {
-    if(userStore.currentUser){
-      fetchNotifications()
-    }else{
-      unreadCount.value = 0
+function stopPolling() {
+  clearInterval(timer)
+  timer = null
+  unreadCount.value = 0
+  localStorage.removeItem('unread-count') // 登出时也清除缓存
+}
+
+watch(
+  () => userStore.currentUser,
+  (user) => {
+    if (user) {
+      startPolling()
+    } else {
+      stopPolling()
     }
-  }, 30000)
-})
+  },
+  { immediate: true } // 页面初始化时根据当前状态决定是否启动
+)
 </script>
 
 <style>
@@ -88,7 +118,6 @@ nav {
 
 
 nav a {
-  margin-right: 15px;
   margin-top: 4px;
   margin-bottom: 4px;
   text-decoration: none;
@@ -107,7 +136,6 @@ nav a.router-link-active {
 }
 
 nav button {
-  margin-left: 10px;
   margin-top: 4px;
   margin-bottom: 4px;
   background: none;
@@ -140,7 +168,6 @@ nav button:hover {
 /*消息提醒图标 */
 .notification-icon {
   position: relative;
-  margin-right: 12px;
   display: flex;
   align-items: center;
 }

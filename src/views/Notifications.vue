@@ -29,8 +29,7 @@ async function fetchNotifications() {
       }
     })
     if (res.ok) {
-      const data = await res.json()
-      notifications.value = data
+      notifications.value = await res.json()
     }
   } catch (err) {
     console.error('获取通知失败', err)
@@ -40,27 +39,67 @@ async function fetchNotifications() {
 }
 
 async function handleClick(notification) {
+  if (!notification.postId) return
+
+  // 先标记已读，但不立即减少未读数
   if (!notification.isRead) {
-    // 先直接改本地状态，页面立即更新
-    notification.isRead = true
-    // 异步调接口标记已读，不用等返回
-    fetch(`/api/notifications/${notification._id}/read`, {
-      method: 'PUT',
+    try {
+      const res = await fetch(`/api/notifications/${notification._id}/read`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('forum-token')}`
+        }
+      })
+      if (!res.ok) return
+      notification.isRead = true
+    } catch {
+      return
+    }
+  }
+
+  // 检查帖子是否存在
+  try {
+    const check = await fetch(`/api/posts/${notification.postId}`, {
+      method: 'HEAD',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('forum-token')}`
       }
-    }).catch(() => {
-      // 如果接口失败，回滚本地状态
-      notification.isRead = false
     })
+
+    if (check.ok) {
+      // 帖子存在：减少未读数 + 跳转
+      decreaseUnreadCount()
+      router.push(`/post/${notification.postId}`)
+    } else if (check.status === 404) {
+      // 帖子不存在：删除通知并减少未读数
+      notifications.value = notifications.value.filter(n => n._id !== notification._id)
+      if (!notification.isRead) {
+        decreaseUnreadCount()
+      }
+      alert('该帖子已被删除或不存在')
+    } else {
+      alert('该帖子暂时无法访问')
+    }
+  } catch {
+    alert('网络异常，请稍后再试')
   }
-  router.push(`/post/${notification.postId}`)
 }
+
+function decreaseUnreadCount() {
+  const cached = localStorage.getItem('unread-count')
+  if (cached !== null) {
+    const current = parseInt(cached, 10)
+    if (current > 0) {
+      localStorage.setItem('unread-count', current - 1)
+    }
+  }
+}
+
 function formatTime(time) {
   const d = new Date(time)
   const now = new Date()
   const diff = now - d
-  
+
   if (diff < 60000) return '刚刚'
   if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
   if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
