@@ -9,12 +9,11 @@
 
   <!-- 右侧：用户主页和消息提醒 包在一起 -->
       <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-        <router-link to="/notifications" class="notification-icon">
+        <router-link to="/Notifications" class="notification-icon">
           <img src="/notification-bell.svg" alt="通知" />
-          <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
         </router-link>
         <template v-if="userStore.currentUser">
-          <router-link to="/profile" class="nav-avatar">
+          <router-link to="/Profile" class="nav-avatar">
             <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像" />
           </router-link>
         </template>

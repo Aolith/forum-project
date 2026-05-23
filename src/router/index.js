@@ -6,6 +6,7 @@ const routes = [
   { path: "/write", component: () => import("../views/WritePost.vue") },  // 懒加载
   { path: "/Login", component: () => import("../views/Login.vue") },  // 懒加载
   { path: "/Register", component: () => import("../views/Register.vue") },  // 懒加载
+  { path: "/Notifications", component: () => import("../views/Notifications.vue") },
   { path: "/Profile", component: () => import("../views/Profile.vue") },
   { path: '/admin', component: () => import('../views/Admin.vue') },
   {
