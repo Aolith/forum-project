@@ -3,6 +3,7 @@ const commentRouter = express.Router({ mergeParams: true }) //嵌套路由的核
 const auth = require('../middleware/auth')
 
 const Post = require('../models/Post') //引入数据库
+const Notification = require('../models/Notification') //引入通知模型
 const filterSensitiveWords = require('../utils/filterSensitiveWords')
 const anonymizePost = require('../utils/anonymizePost')
 //提交评论
@@ -22,6 +23,33 @@ commentRouter.post('/', auth, async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: '帖子不存在' })
     }
+    if(replyTo && !post.comments.id(replyToCommentId)) {
+      return res.status(400).json({ error: '回复的评论不存在' })
+    }
+    //消息通知(评论帖子)
+    if (post.author.toString() !== req.user._id) {
+      // 创建通知
+      const notification = new Notification({
+        type: 'comment',
+        postId: postId,
+        sender: req.user._id,
+        receiver: post.author,
+      })
+      await notification.save()
+    }
+    //消息通知(回复评论)
+    if (replyTo && post.comments.id(replyToCommentId) && post.comments.id(replyToCommentId).author.toString() !== req.user._id) {
+      const notification = new Notification({
+        type: 'reply',
+        sender: req.user._id,
+        receiver: post.comments.id(replyToCommentId).author,
+        postId: postId,
+        commentId: replyToCommentId
+      })
+      await notification.save()
+    }
+
+    //在内存中操作文档对象，最后整体保存
     post.comments.push({
       comment: filteredComment,
       author: req.user._id,
@@ -35,6 +63,7 @@ commentRouter.post('/', auth, async (req, res) => {
     await post.populate('author', 'name')
     await post.populate('comments.author', 'name')
     await post.populate('comments.replyTo', 'name')
+
     // 匿名处理
     const end = anonymizePost(post)
     return res.json(end)
@@ -132,7 +161,17 @@ commentRouter.put('/:commentId/likes', auth, async (req, res) => {
     if (comment.likedBy.includes(req.user._id)) {
       return res.status(400).json({ error: '你已经点过赞了' })
     }
-
+    //消息通知
+    if (comment.author && comment.author.toString() !== req.user._id) {
+      const notification = new Notification({
+        type: 'like_comment',
+        sender: req.user._id,
+        receiver: comment.author,
+        postId: req.params.postId,
+        commentId: req.params.commentId
+      })
+      await notification.save()
+    }
     comment.likes += 1
     comment.likedBy.push(req.user._id)
     await post.save()

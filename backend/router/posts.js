@@ -3,6 +3,7 @@ const postRouter = express.Router()
 const auth = require('../middleware/auth')
 
 const Post = require('../models/Post') //引入数据库
+const Notification = require('../models/Notification') //引入通知模型
 const filterSensitiveWords = require('../utils/filterSensitiveWords')
 const anonymizePost = require('../utils/anonymizePost')
 //get接口
@@ -177,6 +178,16 @@ postRouter.put('/:id/likes', auth, async (req, res) => {
     //防重复
     if (post.likedBy.includes(user)) {
       return res.status(400).json({ error: '你已经点过赞了' })
+    }
+    //消息通知
+    if (post.author && post.author.toString() !== user) {
+      const notification = new Notification({
+        type: 'like_post',
+        sender: req.user._id,
+        receiver: post.author,
+        postId: id
+      })
+      await notification.save()
     }
     // 找到帖子 → 操作内存中的文档 → 整体保存
     post.likes += 1
