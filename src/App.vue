@@ -9,10 +9,11 @@
 
   <!-- 右侧：用户主页和消息提醒 包在一起 -->
       <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-        <router-link to="/Notifications" class="notification-icon">
-          <img src="/notification-bell.svg" alt="通知" />
-        </router-link>
         <template v-if="userStore.currentUser">
+          <router-link to="/Notifications" class="notification-icon">
+            <img src="/notification-bell.svg" alt="通知" />
+            <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount>99?'99+' : unreadCount }}</span>
+          </router-link>
           <router-link to="/Profile" class="nav-avatar">
             <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像" />
           </router-link>
@@ -31,10 +32,42 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue"
 import { useThemeStore } from "@/stores/theme"
 import { useUserStore } from "./stores/user"
 const themeStore = useThemeStore()
 const userStore = useUserStore()
+
+const unreadCount = ref(0)
+//消息通知查询函数
+async function fetchNotifications() {
+ try{
+    const res = await fetch("/api/notifications/unread-count",{
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('forum-token')}`
+      }
+    })
+    
+    if (res.ok) {
+      const data = await res.json()
+      unreadCount.value = data.count
+    }
+ }catch (err) {
+    //静默失败
+ }
+}
+
+//每30秒查询一次消息通知
+onMounted(() => {
+  setInterval(() => {
+    if(userStore.currentUser){
+      fetchNotifications()
+    }else{
+      unreadCount.value = 0
+    }
+  }, 30000)
+})
 </script>
 
 <style>
@@ -108,23 +141,32 @@ nav button:hover {
 .notification-icon {
   position: relative;
   margin-right: 12px;
+  display: flex;
+  align-items: center;
 }
 .notification-icon img {
   width: 30px;
   height: 30px;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+.notification-icon:hover img {
+  opacity: 1;
 }
 .notification-badge {
   position: absolute;
   top: -6px;
-  right: -6px;
+  right: -8px;
   background: #e74c3c;
   color: white;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 11px;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 4px;
+  font-weight: 600;
 }
 </style>
