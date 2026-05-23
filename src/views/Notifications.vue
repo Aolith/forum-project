@@ -76,6 +76,7 @@ async function handleClick(notification) {
 
     if (check.ok) {
       if (wasUnread) notificationStore.decreaseUnreadCount()
+      notifications.value = notifications.value.filter(n => n._id !== notification._id)
       router.push(`/post/${notification.postId}`)
     } else if (check.status === 404) {
       notifications.value = notifications.value.filter(n => n._id !== notification._id)

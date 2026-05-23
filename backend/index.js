@@ -14,7 +14,11 @@ mongoose
     console.log('MongoDB连接成功')
     // 启动时立即清理一次
     try {
-      const deleted = await Notification.deleteMany({ isRead: true })
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      const deleted = await Notification.deleteMany({
+        isRead: true,
+        createdAt: { $lt: oneDayAgo }
+      })
       if (deleted.deletedCount > 0) {
         console.log(`启动时清理了 ${deleted.deletedCount} 条已读通知`)
       }
@@ -25,7 +29,11 @@ mongoose
     // 每小时清理一次
     setInterval(async () => {
       try {
-        const result = await Notification.deleteMany({ isRead: true })
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+        const result = await Notification.deleteMany({
+          isRead: true,
+          createdAt: { $lt: oneDayAgo }
+        })
         if (result.deletedCount > 0) {
           console.log(`已自动清理 ${result.deletedCount} 条已读通知`)
         }
