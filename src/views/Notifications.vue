@@ -44,7 +44,10 @@ async function fetchNotifications() {
 
 // 处理点击
 async function handleClick(notification) {
-  if (!notification.postId) return
+  if (!notification.postId) {
+    alert('该通知关联的帖子已失效')
+    return
+  }
 
   const wasUnread = !notification.isRead
 
