@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useNotificationStore } from '@/stores/notification'
 
 const router = useRouter()
+const notificationStore = useNotificationStore()
 const notifications = ref([])
 const loading = ref(true)
 
@@ -20,6 +22,8 @@ const typeIcons = {
   like_comment: '/notification-like.svg'
 }
 
+
+// 获取通知
 async function fetchNotifications() {
   loading.value = true
   try {
@@ -38,12 +42,12 @@ async function fetchNotifications() {
   }
 }
 
+// 处理点击
 async function handleClick(notification) {
   if (!notification.postId) return
 
-  const wasUnread = !notification.isRead  // 在修改前保存原始未读状态
+  const wasUnread = !notification.isRead
 
-  // 标记已读
   if (!notification.isRead) {
     try {
       const res = await fetch(`/api/notifications/${notification._id}/read`, {
@@ -59,7 +63,6 @@ async function handleClick(notification) {
     }
   }
 
-  // 检查帖子是否存在
   try {
     const check = await fetch(`/api/posts/${notification.postId}`, {
       method: 'HEAD',
@@ -69,13 +72,11 @@ async function handleClick(notification) {
     })
 
     if (check.ok) {
-      // 帖子存在 → 减未读数（如果原本未读）并跳转
-      if (wasUnread) decreaseUnreadCount()
+      if (wasUnread) notificationStore.decreaseUnreadCount()
       router.push(`/post/${notification.postId}`)
     } else if (check.status === 404) {
-      // 帖子不存在 → 删除通知
       notifications.value = notifications.value.filter(n => n._id !== notification._id)
-      if (wasUnread) decreaseUnreadCount()
+      if (wasUnread) notificationStore.decreaseUnreadCount() 
       alert('该帖子已被删除或不存在')
     } else {
       alert('该帖子暂时无法访问')
@@ -85,16 +86,8 @@ async function handleClick(notification) {
   }
 }
 
-function decreaseUnreadCount() {
-  const cached = localStorage.getItem('unread-count')
-  if (cached !== null) {
-    const current = parseInt(cached, 10)
-    if (current > 0) {
-      localStorage.setItem('unread-count', current - 1)
-    }
-  }
-}
 
+// 格式化时间
 function formatTime(time) {
   const d = new Date(time)
   const now = new Date()
@@ -106,7 +99,7 @@ function formatTime(time) {
   if (diff < 172800000) return '昨天'
   return `${d.getMonth() + 1}月${d.getDate()}日`
 }
-
+// 挂载
 onMounted(() => {
   fetchNotifications()
 })

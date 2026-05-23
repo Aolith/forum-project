@@ -12,7 +12,7 @@
         <template v-if="userStore.currentUser">
           <router-link to="/Notifications" class="notification-icon">
             <img src="/notification-bell.svg" alt="通知" />
-            <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount>99?'99+' : unreadCount }}</span>
+            <span v-if="notificationStore.unreadCount > 0" class="notification-badge">{{ notificationStore.unreadCount>99?'99+' : notificationStore.unreadCount }}</span>
           </router-link>
           <router-link to="/Profile" class="nav-avatar">
             <img :src="(userStore.currentUser?.avatar || '/default-avatar.png') + '?v=' + (userStore.currentUser?.avatarVersion || 1)" alt="头像"  @error="e => e.target.src = '/default-avatar.png'" />
@@ -32,72 +32,15 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
 import { useThemeStore } from "@/stores/theme"
 import { useUserStore } from "./stores/user"
+import { useNotificationStore } from "./stores/notification"
+
 const themeStore = useThemeStore()
 const userStore = useUserStore()
+const notificationStore = useNotificationStore()
+notificationStore.autoPolling() // 组件挂载时启动自动轮询管理
 
-const unreadCount = ref(0)
-//消息通知查询函数
-async function fetchNotifications() {
-  try {
-    const res = await fetch('/api/notifications/unread-count', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
-    })
-
-    if (res.ok) {
-      // 正常返回，更新计数
-      const data = await res.json()
-      unreadCount.value = data.count
-      localStorage.setItem('unread-count', data.count)
-    } else if (res.status === 401 || res.status === 403) {
-      // 认证失败，直接清零（token 过期或无效）
-      unreadCount.value = 0
-      localStorage.removeItem('unread-count')
-    } else {
-      // 其他接口错误（如 500），用缓存兜底
-      const cached = localStorage.getItem('unread-count')
-      if (cached !== null) {
-        unreadCount.value = parseInt(cached) || 0
-      }
-    }
-  } catch (err) {
-    // 网络错误，用缓存兜底
-    const cached = localStorage.getItem('unread-count')
-    if (cached !== null) {
-      unreadCount.value = parseInt(cached) || 0
-    }
-  }
-}
-//每10秒查询一次消息通知
-
-let timer = null
-
-function startPolling() {
-  if (timer) return
-  fetchNotifications() // 立即拉一次
-  timer = setInterval(fetchNotifications, 10000)
-}
-
-function stopPolling() {
-  clearInterval(timer)
-  timer = null
-  unreadCount.value = 0
-  localStorage.removeItem('unread-count') // 登出时也清除缓存
-}
-
-watch(
-  () => userStore.currentUser,
-  (user) => {
-    if (user) {
-      startPolling()
-    } else {
-      stopPolling()
-    }
-  },
-  { immediate: true } // 页面初始化时根据当前状态决定是否启动
-)
 </script>
 
 <style>
