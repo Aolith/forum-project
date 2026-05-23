@@ -40,20 +40,22 @@ async function fetchNotifications() {
 }
 
 async function handleClick(notification) {
-  // 标记已读
   if (!notification.isRead) {
+    // 先直接改本地状态，页面立即更新
+    notification.isRead = true
+    // 异步调接口标记已读，不用等返回
     fetch(`/api/notifications/${notification._id}/read`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('forum-token')}`
       }
+    }).catch(() => {
+      // 如果接口失败，回滚本地状态
+      notification.isRead = false
     })
-    notification.isRead = true
   }
-  // 跳转到对应帖子
   router.push(`/post/${notification.postId}`)
 }
-
 function formatTime(time) {
   const d = new Date(time)
   const now = new Date()

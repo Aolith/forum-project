@@ -5,13 +5,38 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const path = require('path')
 const helmet = require('helmet')
+const Notification = require('./models/Notification')
+const app = express()
 //连接MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB连接成功'))
+  .then(async () => {
+    console.log('MongoDB连接成功')
+    // 启动时立即清理一次
+    try {
+      const deleted = await Notification.deleteMany({ isRead: true })
+      if (deleted.deletedCount > 0) {
+        console.log(`启动时清理了 ${deleted.deletedCount} 条已读通知`)
+      }
+    } catch (err) {
+      console.error('清理已读通知失败:', err)
+    }
+    
+    // 每小时清理一次
+    setInterval(async () => {
+      try {
+        const result = await Notification.deleteMany({ isRead: true })
+        if (result.deletedCount > 0) {
+          console.log(`已自动清理 ${result.deletedCount} 条已读通知`)
+        }
+      } catch (err) {
+        console.error('清理已读通知失败:', err)
+      }
+    }, 60 * 60 * 1000)
+  })
   .catch((err) => console.error('MongoDB连接失败', err))
 
-const app = express()
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: false

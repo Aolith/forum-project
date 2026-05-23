@@ -31,7 +31,7 @@ notificationRouter.put('/:id/read',auth,async(req,res)=>{
     const notification=await Notification.findOneAndUpdate(
       {_id:req.params.id,receiver:req.user._id},
       {isRead:true},
-      {new:true}
+      { returnDocument: 'after' } 
     )
     res.json(notification)
   }catch(err){
