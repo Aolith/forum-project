@@ -77,7 +77,7 @@ onUnmounted(() => {
       <span v-if="currentCategory === 'hot'" class="category-tag">{{
         getCategoryLabel(post.category)
       }}</span>
-      <router-link :to="'/opst/' + post._id" class="post-link">
+      <router-link :to="'/post/' + post._id" class="post-link">
         <h2>
           {{ post.title }}
         </h2>
