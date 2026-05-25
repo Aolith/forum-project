@@ -1,8 +1,8 @@
-const moogoose=require('mongoose')
+const mongoose=require('mongoose')
 
-const carpoolSchema=new moogoose.Schema({
+const carpoolSchema=new mongoose.Schema({
     user:{
-      type:moogoose.Schema.Types.ObjectId,
+      type:mongoose.Schema.Types.ObjectId,
       ref:'User',
       required:true
     },
@@ -17,7 +17,7 @@ const carpoolSchema=new moogoose.Schema({
     destination:{
       type:String,
       required:true,
-      enum:['南昌站','南昌南站','南昌西站','南昌东站','昌北机场']
+      enum:['nanchang_station','nanchang_south','nanchang_east','nanchang_west','changbei_airport']
     },
     status:{
       type:String,
@@ -34,4 +34,4 @@ const carpoolSchema=new moogoose.Schema({
 //过滤掉过期的
 carpoolSchema.index({expireAt:1},{expireAfterSeconds:0})
 
-module.exports=moogoose.model('Carpool',carpoolSchema)
+module.exports=mongoose.model('Carpool',carpoolSchema)
