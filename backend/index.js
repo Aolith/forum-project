@@ -113,6 +113,10 @@ app.use('/api/upload', require('./router/upload'))
 const notificationsRouter = require('./router/notifications')
 app.use('/api/notifications', notificationsRouter)
 
+//引入carpool路由
+const carpoolRouter = require('./router/carpool')
+app.use('/api/carpool', carpoolRouter)
+
 //在指定端口启动服务器
 app.listen(port, () => {
   console.log(`服务器在${port}端口启动成功`)

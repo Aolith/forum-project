@@ -5,6 +5,7 @@
       <div>
         <router-link to="/">论坛首页</router-link>
         <router-link to="/write">写帖子</router-link>
+        <router-link to="/Carpool">拼好车</router-link>
       </div>
 
   <!-- 右侧：用户主页和消息提醒 包在一起 -->

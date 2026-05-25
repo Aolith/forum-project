@@ -8,6 +8,7 @@ const routes = [
   { path: "/Register", component: () => import("../views/Register.vue") },  // 懒加载
   { path: "/Notifications", component: () => import("../views/Notifications.vue") },
   { path: "/Profile", component: () => import("../views/Profile.vue") },
+  { path: "/Carpool", component: () => import("../views/Carpool.vue") },
   { path: '/admin', component: () => import('../views/Admin.vue') },
   {
     path: "/post/:id",
