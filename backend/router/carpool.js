@@ -6,12 +6,15 @@ const Carpool=require('../models/Carpool')
 //获取拼车信息
 carpoolRouter.get('/', auth, async (req, res) => {
   try {
+    const myCarpool = await Carpool.findOne({ user: req.user._id, status: 'active' })
+    if (!myCarpool) {
+      return res.json([])
+    }
     const { destination, departureTime } = req.query
     const now = new Date()
     const filter = {
       status: 'active',
       expireAt: { $gt: now },
-      user: { $ne: req.user._id } // 不显示自己的拼车
     }
 
     if (destination) {
@@ -31,7 +34,7 @@ carpoolRouter.get('/', auth, async (req, res) => {
     }
 
     const carpools = await Carpool.find(filter)
-      .populate('user', 'username')
+      .populate('user', 'name')
       .sort({ departureTime: 1 })
 
     res.json(carpools)
@@ -45,7 +48,7 @@ carpoolRouter.get('/', auth, async (req, res) => {
 carpoolRouter.get('/:id',auth, async (req, res) => { 
   try {
     const carpool=await Carpool.findById(req.params.id)
-       .populate('user','username')
+       .populate('user','name')
     if (!carpool) {
       return res.status(404).json({ error: '拼车信息不存在' })
     }
@@ -85,7 +88,7 @@ carpoolRouter.post('/',auth, async (req, res) => {
       expireAt: new Date(departureDate.getTime() + 60 * 60 * 1000)
     })
     let createdCarpool=await newCarpool.save()
-    createdCarpool=await createdCarpool.populate('user','username')
+    createdCarpool=await createdCarpool.populate('user','name')
     res.status(201).json(createdCarpool)
   } catch (err) {
     console.error('发布拼车信息失败', err)
@@ -101,7 +104,7 @@ carpoolRouter.delete('/:id',auth, async (req, res) => {
     if (!carpool) {
       return res.status(404).json({ error: '拼车信息不存在' })
     }
-    if(carpool.user.toString() !== req.user._id){
+    if (carpool.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: '只能取消自己的拼车信息' })
     }
     if(carpool.expireAt < Date.now()){

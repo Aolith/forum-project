@@ -1,5 +1,5 @@
 <script setup>
-import { ref ,onMounted} from 'vue'
+import { ref ,onMounted,computed} from 'vue'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
@@ -12,6 +12,7 @@ const localNow = new Date(now - offset).toISOString().slice(0, 16)
 const departureTime = ref(localNow)
 const minTime = localNow // 新增 minTime，值和默认值一样，但不会变
 const carpools = ref([])
+const myCarpool = computed(() => carpools.value.find(item => isOwner(item)))
 const destinationMap = {
   nanchang_station: '南昌站',
   nanchang_south: '南昌南站',
@@ -49,6 +50,7 @@ async function publish(){
 }
 //取消拼车
 async function cancel(carpoolId) {
+  if (!confirm('确定要取消这个拼车订单吗？')) return 
   try {
     const res = await fetch(`/api/carpool/${carpoolId}`, {
       method: 'DELETE',
@@ -98,16 +100,10 @@ async function applyCarpool(carpoolId) {
   // 后续调用 POST /api/carpool/:id/apply
 }
 
-//格式化时间
-function formatTime(time) {
+// 格式化出发时间（只显示具体时间，不用相对时间）
+function formatDepartureTime(time) {
   const d = new Date(time)
-  const now = new Date()
-  const diff = now - d
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
-  if (diff < 172800000) return '昨天'
-  return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 </script>
 
@@ -131,17 +127,30 @@ function formatTime(time) {
     </ul>
   </div>
   <!-- 拼车订单等待中 -->
-  <div class="container-card"></div>
-  <!--拼成功了，显示拼车信息-->
+    <!-- 我的订单 -->
+  <div v-if="myCarpool" class="my-order-section">
+    <h3>我的订单</h3>
+    <div class="carpool-card">
+      <p>目的地：{{ destinationMap[myCarpool.destination] || myCarpool.destination }}</p>
+      <p>出发时间：{{ formatDepartureTime(myCarpool.departureTime) }}</p>
+      <button class="cancel-btn" @click="cancel(myCarpool._id)">取消订单</button>
+    </div>
+  </div>
+
+  <!-- 匹配列表 -->
   <div class="container-list">
-    <div v-if="carpools.length === 0">暂无匹配的拼车信息</div>
-    <div v-else v-for="item in carpools" :key="item._id" class="carpool-card">
+    <!-- 等待中 -->
+    <div v-if="myCarpool && carpools.length === 1" class="waiting-card">
+      正在等待其他拼友...
+    </div>
+    <!-- 无匹配 -->
+    <div v-else-if="carpools.length === 0">暂无匹配的拼车信息</div>
+    <!-- 匹配列表（排除自己） -->
+    <div v-else v-for="item in carpools.filter(i => !isOwner(i))" :key="item._id" class="carpool-card">
       <p>用户：{{ item.user?.name }}</p>
-      <p>出发时间：{{ formatTime(item.departureTime) }}</p>
+      <p>出发时间：{{ formatDepartureTime(item.departureTime) }}</p>
       <p>目的地：{{ destinationMap[item.destination] || item.destination }}</p>
-      <button @click="applyCarpool(item._id)">申请拼车</button>
-      <!-- 如果是自己发布的，显示取消按钮 -->
-      <button v-if="isOwner(item)" @click="cancel(item._id)">取消订单</button>
+      <button class="apply-btn" @click="applyCarpool(item._id)">申请拼车</button>
     </div>
   </div>
 </template>
@@ -248,6 +257,8 @@ li {
   display: flex;
   flex-direction: column;
   transition: box-shadow var(--transition-fast);
+  align-items: flex-start;
+  text-align: left;
 }
 
 .carpool-card:hover {
@@ -258,6 +269,7 @@ li {
 }
 
 .carpool-card p {
+  text-align: left;
   font-size: var(--font-size-body);
   color: var(--color-text);
   margin: 0;
@@ -286,14 +298,6 @@ li {
   background: var(--color-primary-light);
 }
 
-.carpool-card button:last-child {
-  border-color: #e74c3c;
-  color: #e74c3c;
-}
-
-.carpool-card button:last-child:hover {
-  background: #fde8e8;
-}
 
 /* ========== 空状态 ========== */
 .container-list > div:first-child {
@@ -303,4 +307,40 @@ li {
   font-size: var(--font-size-body);
 }
 
+.my-order-section {
+  max-width: 600px;
+  margin: 0 auto var(--space-md);
+}
+
+.waiting-card {
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+}
+
+/* 申请按钮绿色 */
+.carpool-card .apply-btn {
+  border-color: #27ae60;
+  color: #27ae60;
+  background: var(--color-surface);
+}
+
+.carpool-card .apply-btn:hover {
+  background: #e6f9e6;
+  border-color: #1e8449;
+  color: #1e8449;
+}
+/* 取消按钮红色 */
+.carpool-card .cancel-btn {
+  border-color: #e74c3c;
+  color: #e74c3c;
+  background: var(--color-surface);
+}
+
+.carpool-card .cancel-btn:hover {
+  background: #fde8e8;
+  border-color: #c0392b;
+  color: #c0392b;
+}
 </style>
