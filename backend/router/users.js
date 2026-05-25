@@ -15,7 +15,7 @@ userRouter.post('/login', async (req, res) => {
     if (!sno || !password) {
       return res.status(400).json({ error: '学号和密码不能为空' }) //接口的错误契约
     }
-    const user = await User.findOne({ sno }) //用户用 findOne({ sno }) 是因为用户以 sno 为唯一标识
+    const user = await User.findOne({ sno }).select('+password') //用户用 findOne({ sno }) 是因为用户以 sno 为唯一标识
     //没找到对应学号、学号不存在
     if (!user) {
       return res.status(404).json({ error: '学号不存在' })

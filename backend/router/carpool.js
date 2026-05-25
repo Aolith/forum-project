@@ -74,7 +74,7 @@ carpoolRouter.post('/',auth, async (req, res) => {
     if (departureDate <= new Date()) {
       return res.status(400).json({ error: '出发时间必须是将来的时间' })
     }
-    if(req.user.wechat===''){
+    if(!req.user.wechat){
       return res.status(400).json({ error: '请先去主页绑定微信号' })
     }
     const newCarpool=new Carpool({

@@ -44,7 +44,7 @@ async function publish(){
       throw new Error(data.error || '发布失败')
     }
   }catch(err){
-    alert('发布失败，请稍后再试')
+    alert(err.message || '发布失败，请稍后再试')
   }
 }
 //取消拼车

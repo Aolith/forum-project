@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-    }, //之后要 bcrypt 哈希
+      select: false,
+    }, 
     name: {
       type: String,
       required: true,
