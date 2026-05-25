@@ -129,7 +129,7 @@ function formatTime(time) {
   <div class="container-list">
     <div v-if="carpools.length === 0">暂无匹配的拼车信息</div>
     <div v-else v-for="item in carpools" :key="item._id" class="carpool-card">
-      <p>用户：{{ item.user?.username }}</p>
+      <p>用户：{{ item.user?.name }}</p>
       <p>出发时间：{{ formatTime(item.departureTime) }}</p>
       <p>目的地：{{ destinationMap[item.destination] || item.destination }}</p>
       <button @click="applyCarpool(item._id)">申请拼车</button>
@@ -140,14 +140,152 @@ function formatTime(time) {
 </template>
 
 <style scoped>
-li{
+
+li {
   list-style: none;
 }
-.container-publish{
+
+/* ========== 发布表单卡片 ========== */
+.container-publish {
+  max-width: 600px;
+  margin: 0 auto var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.container-publish ul {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: 0;
+}
+
+.container-publish li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.container-publish label {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.container-publish input,
+.container-publish select {
+  min-height: 50px;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.container-publish input:focus,
+.container-publish select:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.container-publish button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 20px;
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.container-publish button:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* ========== 拼车列表 ========== */
+.container-list {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.carpool-card {
+  padding: var(--space-lg) var(--space-md); /* 上下比左右大 */
+  gap: var(--space-sm); 
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.12),   /* 紧贴的边缘，模拟厚度 */
+    0 4px 16px rgba(0,0,0,0.06);  /* 扩散的虚影，模拟悬浮 */
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--transition-fast);
+}
+
+.carpool-card:hover {
+   box-shadow:
+    0 2px 4px rgba(0,0,0,0.16),
+    0 8px 24px rgba(0,0,0,0.08);
+  transform: translateY(-2px); /* 轻微上浮 */
+}
+
+.carpool-card p {
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.carpool-card p:first-child {
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.carpool-card button {
+  align-self: flex-end;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.carpool-card button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.carpool-card button:last-child {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.carpool-card button:last-child:hover {
+  background: #fde8e8;
+}
+
+/* ========== 空状态 ========== */
+.container-list > div:first-child {
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
 }
 
 </style>
