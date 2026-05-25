@@ -301,8 +301,13 @@ async function submitFeedback() {
   background: var(--color-primary-dark) !important;
 }
 
+/* 管理后台按钮 */
 .btn-admin {
-  display: inline-block;
+  /*独占一行，垂直居中*/
+  width: 90px;
+  height: 30px;
+  display: block;
+  margin: 0 auto;
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-primary);
@@ -427,7 +432,6 @@ async function submitFeedback() {
   text-align: center;
   outline: none;
   width: 100%;
-  box-sizing: border-box;
   transition: border-color var(--transition-fast);
 }
 
