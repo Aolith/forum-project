@@ -6,7 +6,11 @@ const userStore = useUserStore()
 
 // 定义变量
 const destination = ref('')
-const departureTime= ref('')
+const now = new Date()
+const offset = now.getTimezoneOffset() * 60000
+const localNow = new Date(now - offset).toISOString().slice(0, 16)
+const departureTime = ref(localNow)
+const minTime = localNow // 新增 minTime，值和默认值一样，但不会变
 const carpools = ref([])
 const destinationMap = {
   nanchang_station: '南昌站',
@@ -111,7 +115,10 @@ function formatTime(time) {
   <!-- 拼车功能开发中 -->
   <div class="container-publish">
     <ul>
-      <li><label ><input type="datetime-local" v-model="departureTime"></label></li>
+      <li>
+        <label>出发时间</label>
+        <input type="datetime-local" v-model="departureTime" :min="minTime" @click="(e) => e.target.showPicker?.()"/>
+      </li>
       <li><label><select name="" id="" v-model="destination">
         <option value="">请选择目的地</option>
         <option value="nanchang_station">南昌站</option>
@@ -174,7 +181,7 @@ li {
   font-weight: 500;
 }
 
-.container-publish input,
+.container-publish input:not([type="datetime-local"]),
 .container-publish select {
   min-height: 50px;
   width: 100%;
@@ -189,11 +196,12 @@ li {
   box-sizing: border-box;
 }
 
-.container-publish input:focus,
+.container-publish input:not([type="datetime-local"]):focus,
 .container-publish select:focus {
   border-color: var(--color-primary);
   background: var(--color-surface);
 }
+
 
 .container-publish button {
   padding: var(--space-sm) var(--space-lg);
@@ -211,6 +219,13 @@ li {
   background: var(--color-primary-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-card-hover);
+}
+
+.container-publish input[type="datetime-local"] {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 var(--space-md);
+  box-sizing: border-box;
 }
 
 /* ========== 拼车列表 ========== */
