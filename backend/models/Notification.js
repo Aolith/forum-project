@@ -1,33 +1,38 @@
 //消息通知模型
-const moongoose=require('mongoose')
+const mongoose=require('mongoose')
 
-const NotificationSchema=new moongoose.Schema({
+const NotificationSchema=new mongoose.Schema({
   //通知类型
   type:{
     type:String,
-    enum:['comment','reply','like_post','like_comment'],
+    enum:['comment','reply','like_post','like_comment','carpool_request'],
     required:true
   },
   //接收者和发送者
   sender:{
-    type:moongoose.Schema.Types.ObjectId,
+    type:mongoose.Schema.Types.ObjectId,
     ref:'User',
     required:true
   },
   receiver:{
-    type:moongoose.Schema.Types.ObjectId,
+    type:mongoose.Schema.Types.ObjectId,
     ref:'User',
     required:true
   },
   //关联的帖子id和评论id
   postId:{
-    type:moongoose.Schema.Types.ObjectId,
+    type:mongoose.Schema.Types.ObjectId,
     ref:'Post',
-    required:true
+    required:false
   },
   commentId:{
-    type:moongoose.Schema.Types.ObjectId,
+    type:mongoose.Schema.Types.ObjectId,
     default:null
+  },
+  carpoolId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Carpool',
+    default: null
   },
   //是否已读
   isRead:{
@@ -38,4 +43,4 @@ const NotificationSchema=new moongoose.Schema({
   timestamps:true
 })
 
-module.exports=moongoose.model('Notification',NotificationSchema)
+module.exports=mongoose.model('Notification',NotificationSchema)
