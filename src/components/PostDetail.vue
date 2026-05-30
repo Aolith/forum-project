@@ -2,7 +2,7 @@
 import CommentForm from "./CommentForm.vue"
 import CommentList from "./CommentList.vue"
 import LikeButton from "./LikeButton.vue"
-import { computed, watch, ref } from "vue"
+import { computed, watch, ref, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { usePostsStore } from "@/stores/post"
 import { useUserStore } from "@/stores/user"
@@ -10,8 +10,10 @@ const userStore = useUserStore()
 const postsStore = usePostsStore()
 const route = useRoute()
 const router = useRouter()
-const post = computed(() => postsStore.posts.find((p) => p._id === route.params.id))
+const post = ref(null)
 const replyingTo = ref(null) // { commentId, authorName }
+const postStatus=ref(null)
+const loading=ref(true)
 
 const previewImageUrl = ref(null) // 用于图片预览的 URL
 function goHome() {
@@ -32,6 +34,22 @@ const likesCount = postsStore.likesCount
 const updatePosts = postsStore.updatePosts
 const deleteComment = postsStore.deleteComment
 const saveComment = postsStore.saveComment
+async function fetchPost() { 
+  try {
+    const postId = route.params.id
+    const res = await fetch(`/api/posts/${postId}`)
+    if (!res.ok)throw new Error("帖子不存在")
+    post.value = await res.json()
+  } catch (err) {
+    console.error("加载帖子失败:", err)
+    postStatus.value = null
+  }finally {
+    loading.value = false
+  }
+}
+onMounted(() => {
+  fetchPost()
+})
 //删除帖子
 function deletes(postId) {
   if (confirm("确定要删除吗？")) {
@@ -113,8 +131,10 @@ function showImagePreview(url) {
 <template>
   <div class="detail-container">
     <button class="back-btn" @click="goHome">← 回到首页</button>
-
-    <div v-if="post" class="post-card">
+    <div v-if="loading">
+      加载中...
+    </div>
+    <div v-else-if="post" class="post-card">
       <button 
         v-if="userStore.currentUser && String(post.author?._id) !== String(userStore.currentUser?._id)"
         class="btn-report"
