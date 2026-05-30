@@ -5,6 +5,7 @@ const emit = defineEmits(['cancel-reply'])
 const props = defineProps({
   postId: String,  // 帖子 ID，由父组件传入
   replyingTo: Object, // { commentId, authorName } 或 null
+  anonymous: Boolean,
 })
 
 const postsStore = usePostsStore()
@@ -17,7 +18,7 @@ async function submit() {
     return
   }
   
-  const body = { comment: commentText.value }
+  const body = { comment: commentText.value, anonymous: props.anonymous||false }
   if (props.replyingTo) {
     body.replyTo = props.replyingTo.authorId   
     body.replyToCommentId = props.replyingTo.commentId

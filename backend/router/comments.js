@@ -84,13 +84,11 @@ commentRouter.delete('/:commentId', auth, async (req, res) => {
     }
     const comment = post.comments.id(commentId)
     if (!comment) return res.status(404).json({ error: '评论不存在' })
-
     //身份验证
     const user = req.user._id //从 token 里拿的当前用户 _id
-    const isCommentAuthor = comment.author && comment.author.toString() === user
-    const isPostAuthor = post.author.toString() === user
-    
-    if (!isCommentAuthor && !isPostAuthor) {
+
+    //只能删除自己的评论
+    if (comment.author && comment.author.toString() !== user.toString()) {
       return res.status(403).json({ error: '无权限删除此评论' })
     }
 

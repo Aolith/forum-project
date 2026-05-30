@@ -180,6 +180,7 @@ function showImagePreview(url) {
           v-if="userStore.currentUser"
           :postId="post._id"
           :replyingTo="replyingTo"
+          :anonymous="post.anonymous"
           @cancel-reply="replyingTo = null"
         />
         <!-- 游客模式：整张卡片可点击，跳转登录页 -->
