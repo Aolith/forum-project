@@ -140,7 +140,12 @@ async function viewContact(carpoolId) {
     })
     if (res.ok) {
       const { wechat } = await res.json()
-      alert('对方微信号：' + wechat)
+       try {
+        await navigator.clipboard.writeText(wechat)
+        alert('微信号已复制：' + wechat)
+      } catch {
+        alert('微信号：' + wechat + '（复制失败，请手动复制）')
+      }
     } else {
       const data = await res.json()
       throw new Error(data.error || '获取失败')
