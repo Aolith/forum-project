@@ -12,12 +12,19 @@ carpoolRouter.get('/', auth, async (req, res) => {
       return res.json([])
     }
     const { destination, departureTime } = req.query
+    if(!destination ){
+      destination = myCarpool.destination
+    }
+    if(!departureTime){
+      departureTime = myCarpool.departureTime
+    }
     const now = new Date()
     const filter = {
       status: 'active',
       expireAt: { $gt: now },
+      destination: destination,  
+      user: { $ne: req.user._id }  
     }
-
     if (destination) {
       filter.destination = destination
     }
