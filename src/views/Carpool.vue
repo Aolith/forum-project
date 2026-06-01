@@ -94,10 +94,24 @@ onMounted(()=>{
   match()
 })
 
-//申请拼车
+// 申请拼车
 async function applyCarpool(carpoolId) {
-  console.log('申请拼车', carpoolId)
-  // 后续调用 POST /api/carpool/:id/apply
+  try {
+    const res = await fetch(`/api/carpool/${carpoolId}/apply`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('forum-token')}`
+      }
+    })
+    if (res.ok) {
+      alert('申请已发送，请等待对方确认')
+    } else {
+      const data = await res.json()
+      throw new Error(data.error || '申请失败')
+    }
+  } catch (err) {
+    alert(err.message)
+  }
 }
 
 // 格式化出发时间（只显示具体时间，不用相对时间）
