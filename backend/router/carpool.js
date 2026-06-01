@@ -165,7 +165,7 @@ carpoolRouter.post('/:id/apply',auth, async (req, res) => {
     await carpool.save()
     // 发通知给拼车发布者
     await new Notification({
-      type: 'apply_carpool',
+      type: 'carpool_request',
       sender: req.user._id,
       receiver: carpool.user,
       carpoolId: carpool._id,
@@ -211,7 +211,7 @@ carpoolRouter.put('/:id/approve', auth, async (req, res) => {
 
     // 发通知给申请人
     await new Notification({
-      type: 'carpool_approved',
+      type: 'carpool_approve',
       sender: req.user._id,
       receiver: applicantId,
       carpoolId: carpool._id,
@@ -250,7 +250,7 @@ carpoolRouter.put('/:id/reject', auth, async (req, res) => {
 
     // 发通知给申请人
     await new Notification({
-      type: 'carpool_rejected',
+      type: 'carpool_reject',
       sender: req.user._id,
       receiver: applicantId,
       carpoolId: carpool._id,
