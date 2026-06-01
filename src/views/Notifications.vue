@@ -152,9 +152,9 @@ async function approveApplicant(carpoolId, applicantId) {
 }
 
 // 查看拼车微信号
-async function viewContact(carpoolId) {
+async function viewContact(notification) {
   try {
-    const res = await fetch(`/api/carpool/${carpoolId}/contact`, {
+    const res = await fetch(`/api/carpool/${notification.carpoolId}/contact`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
     })
     if (res.ok) {
@@ -164,6 +164,21 @@ async function viewContact(carpoolId) {
         alert('微信号已复制：' + wechat)
       } catch {
         alert('微信号：' + wechat + '（复制失败，请手动复制）')
+      }
+      // 标记已读
+      if (!notification.isRead) {
+        try {
+          const readRes = await fetch(`/api/notifications/${notification._id}/read`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
+          })
+          if (readRes.ok) {
+            notification.isRead = true
+            notificationStore.decreaseUnreadCount()
+          }
+        } catch {
+          // 静默失败
+        }
       }
     } else {
       const data = await res.json()
@@ -274,7 +289,7 @@ onMounted(() => {
         <!-- 拼车同意通知：仅申请人可见，显示查看微信按钮 -->
         <button 
           v-if="item.type === 'carpool_approve'"
-          @click.stop="viewContact(item.carpoolId)"
+          @click.stop="viewContact(item)"
           class="btn-view-wechat"
         >
           查看微信
