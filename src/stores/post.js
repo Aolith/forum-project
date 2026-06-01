@@ -176,8 +176,14 @@ export const usePostsStore = defineStore("post", () => {
         console.error("后端报错：", errorData.error)
         throw new Error(errorData.error || "提交失败")
       }
-      const updatedPost = await res.json()
-      posts.value = posts.value.map((p) => (p._id === updatedPost._id ? updatedPost : p))
+      //重新获取帖子最新数据
+      const refreshRes = await fetch(`/api/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
+      })
+      if (!refreshRes.ok) throw new Error('帖子不存在')
+      const freshPost = await refreshRes.json()
+      //用新帖子对象替换本地旧数据
+      posts.value = posts.value.map(p => p._id === freshPost._id ? freshPost : p)
     } catch (err) {
       console.error("提交评论失败", err)
       throw err
@@ -202,8 +208,14 @@ export const usePostsStore = defineStore("post", () => {
         console.error("后端报错：", errorData.error)
         throw new Error(errorData.error || "删除失败")
       }
-      const updatedPost = await res.json()
-      posts.value = posts.value.map((p) => (p._id === updatedPost._id ? updatedPost : p))
+      const refreshRes = await fetch(`/api/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
+      })
+      //重新获取帖子最新数据
+      if (!refreshRes.ok) throw new Error('帖子不存在')
+      const freshPost = await refreshRes.json()
+      //用新帖子对象替换本地旧数据
+      posts.value = posts.value.map(p => p._id === freshPost._id ? freshPost : p)
     } catch (err) {
       console.error("删除评论失败", err)
     }
@@ -228,8 +240,14 @@ export const usePostsStore = defineStore("post", () => {
         console.error("后端报错：", errorData.error)
         throw new Error(errorData.error || "编辑失败")
       }
-      const updatedPost = await res.json()
-      posts.value = posts.value.map((p) => (p._id === updatedPost._id ? updatedPost : p))
+      //重新获取帖子最新数据
+      const refreshRes = await fetch(`/api/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
+      })
+      if (!refreshRes.ok) throw new Error('帖子不存在')
+      const freshPost = await refreshRes.json()
+      //用新帖子对象替换本地旧数据
+      posts.value = posts.value.map(p => p._id === freshPost._id ? freshPost : p)
     } catch (err) {
       console.error("编辑评论失败", err)
     }

@@ -50,6 +50,14 @@ async function fetchPost() {
 onMounted(() => {
   fetchPost()
 })
+// 监听 store 中对应帖子的变化，自动同步到当前 post
+watch(
+  () => postsStore.posts.find(p => p._id === route.params.id),
+  (newPost) => {
+    if (newPost) post.value = newPost
+  },
+  { immediate: true }
+)
 //删除帖子
 function deletes(postId) {
   if (confirm("确定要删除吗？")) {

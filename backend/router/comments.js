@@ -87,12 +87,15 @@ commentRouter.delete('/:commentId', auth, async (req, res) => {
     //身份验证
     const user = req.user._id //从 token 里拿的当前用户 _id
 
-    //只能删除自己的评论
-    if (comment.author && comment.author.toString() !== user.toString()) {
+    // 权限判断：帖主可以删除任何评论，评论作者可以删除自己的评论
+    const isPostOwner = post.author && post.author.toString() === user.toString()
+    const isCommentAuthor = comment.author && comment.author.toString() === user.toString()
+
+    if (!isPostOwner && !isCommentAuthor) {
       return res.status(403).json({ error: '无权限删除此评论' })
     }
 
-    comment.deleteOne() // 删除这条子文档
+    await comment.deleteOne()
     await post.save() //保存
     // 填充帖子作者和评论作者
     await post.populate('author', 'name')
@@ -123,8 +126,8 @@ commentRouter.put('/:commentId', auth, async (req, res) => {
     }
     //身份验证
     // 编辑评论的权限判断
-    const user = req.user._id
-    if (!commentDoc.author || commentDoc.author.toString() !== user) {
+    const userId = req.user._id.toString() //从 token 里拿的当前用户 _id
+    if (!commentDoc.author || commentDoc.author.toString() !== userId) {
       return res.status(403).json({ error: '只能编辑自己的评论' })
     }
     // 过滤敏感词
