@@ -5,7 +5,7 @@ const NotificationSchema=new mongoose.Schema({
   //通知类型
   type:{
     type:String,
-    enum:['comment','reply','like_post','like_comment','carpool_request'],
+    enum:['comment','reply','like_post','like_comment','carpool_request','carpool_approve','carpool_reject'],
     required:true
   },
   //接收者和发送者
