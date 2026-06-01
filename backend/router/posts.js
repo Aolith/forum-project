@@ -172,7 +172,7 @@ postRouter.put('/:id', auth, async (req, res) => {
     if (contentResult.blocked) {
       return res.status(400).json({ error: '内容包含违规信息，修改失败' })
     }
-    let updatedPost = await Post.findByIdAndUpdate(id, { content: contentResult.filtered }, { new: true })
+    let updatedPost = await Post.findByIdAndUpdate(id, { content: contentResult.filtered }, {returnDocument: 'after'}) 
     updatedPost = await Post.findById(updatedPost._id)
       .populate('author', 'name wechat showWechat')
       .populate('comments.author', 'name')
