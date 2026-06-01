@@ -12,14 +12,20 @@ const typeLabels = {
   comment: '评论了你的帖子',
   reply: '回复了你的评论',
   like_post: '赞了你的帖子',
-  like_comment: '赞了你的评论'
+  like_comment: '赞了你的评论',
+  carpool_request: '想和你拼车',
+  carpool_approve: '同意了你的拼车申请',
+  carpool_reject: '拒绝了你的拼车申请'
 }
 
 const typeIcons = {
   comment: '/notification-reply.svg',
   reply: '/notification-reply.svg',
   like_post: '/notification-like.svg',
-  like_comment: '/notification-like.svg'
+  like_comment: '/notification-like.svg',
+  carpool_request: '/notification-car.svg',
+  carpool_approve: '/notification-car.svg',
+  carpool_reject: '/notification-car.svg'
 }
 
 
@@ -44,6 +50,10 @@ async function fetchNotifications() {
 
 // 处理点击
 async function handleClick(notification) {
+  // 拼车类通知不在这里处理，由各自按钮负责
+  if (notification.type && notification.type.startsWith('carpool_')) {
+    return
+  }
   if (!notification.postId) {
     alert('该通知关联的帖子已失效')
     return
@@ -90,6 +100,85 @@ async function handleClick(notification) {
   }
 }
 
+// 同意拼车申请
+async function approveApplicant(carpoolId, applicantId) {
+  try {
+    const res = await fetch(`/api/carpool/${carpoolId}/approve`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('forum-token')}`
+      },
+      body: JSON.stringify({ applicantId })
+    })
+    if (res.ok) {
+      alert('已同意，对方可查看你的微信号')
+      // 从列表中移除这条申请通知
+      notifications.value = notifications.value.filter(n => {
+        return !(n.type === 'carpool_request' && n.carpoolId === carpoolId)
+      })
+      // 减少未读计数（如果该通知未读）
+      const notification = notifications.value.find(n => n.carpoolId === carpoolId && n.type === 'carpool_request')
+      if (notification && !notification.isRead) {
+        notificationStore.decreaseUnreadCount()
+      }
+    } else {
+      const data = await res.json()
+      throw new Error(data.error || '操作失败')
+    }
+  } catch (err) {
+    alert(err.message)
+  }
+}
+
+// 查看拼车微信号
+async function viewContact(carpoolId) {
+  try {
+    const res = await fetch(`/api/carpool/${carpoolId}/contact`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('forum-token')}` }
+    })
+    if (res.ok) {
+      const { wechat } = await res.json()
+      alert('对方微信号：' + wechat)
+    } else {
+      const data = await res.json()
+      throw new Error(data.error || '获取失败')
+    }
+  } catch (err) {
+    alert(err.message)
+  }
+}
+
+// 拒绝拼车申请
+async function rejectApplicant(carpoolId, applicantId) {
+  try {
+    const res = await fetch(`/api/carpool/${carpoolId}/reject`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('forum-token')}`
+      },
+      body: JSON.stringify({ applicantId })
+    })
+    if (res.ok) {
+      alert('已拒绝该申请')
+      // 从列表中移除这条申请通知
+      notifications.value = notifications.value.filter(n => {
+        return !(n.type === 'carpool_request' && n.carpoolId === carpoolId)
+      })
+      // 减少未读计数（如果该通知未读）
+      const notification = notifications.value.find(n => n.carpoolId === carpoolId && n.type === 'carpool_request')
+      if (notification && !notification.isRead) {
+        notificationStore.decreaseUnreadCount()
+      }
+    } else {
+      const data = await res.json()
+      throw new Error(data.error || '操作失败')
+    }
+  } catch (err) {
+    alert(err.message)
+  }
+}
 
 // 格式化时间
 function formatTime(time) {
@@ -140,6 +229,30 @@ onMounted(() => {
           <span class="notification-time">{{ formatTime(item.createdAt) }}</span>
         </div>
         <span v-if="!item.isRead" class="notification-dot"></span>
+        <!-- 拼车申请通知：仅发布者可见，显示同意按钮 -->
+        <template v-if="item.type === 'carpool_request'">
+        <button 
+          @click.stop="approveApplicant(item.carpoolId, item.sender?._id)"
+          class="btn-approve"
+        >
+          同意
+        </button>
+        <button
+          @click.stop="rejectApplicant(item.carpoolId, item.sender?._id)"
+          class="btn-reject"
+        >
+          拒绝
+        </button>
+      </template>
+
+        <!-- 拼车同意通知：仅申请人可见，显示查看微信按钮 -->
+        <button 
+          v-if="item.type === 'carpool_approve'"
+          @click.stop="viewContact(item.carpoolId)"
+          class="btn-view-wechat"
+        >
+          查看微信
+        </button>
       </div>
     </div>
   </main>
@@ -227,4 +340,45 @@ onMounted(() => {
   background: var(--color-primary);
   flex-shrink: 0;
 }
+
+/* 拼车操作按钮 */
+.btn-approve {
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.btn-reject {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.btn-reject:hover {
+  background: #c0392b;
+}
+
+.btn-view-wechat {
+  background: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
 </style>
