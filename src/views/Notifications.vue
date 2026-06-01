@@ -52,10 +52,27 @@ async function fetchNotifications() {
 
 // 处理点击
 async function handleClick(notification) {
-  // 拼车类通知不在这里处理，由各自按钮负责
+  // 拼车类通知：只标记已读，不跳转
   if (notification.type && notification.type.startsWith('carpool_')) {
+    if (!notification.isRead) {
+      try {
+        const res = await fetch(`/api/notifications/${notification._id}/read`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('forum-token')}`
+          }
+        })
+        if (res.ok) {
+          notification.isRead = true
+          notificationStore.decreaseUnreadCount()
+        }
+      } catch {
+        // 静默失败，不影响使用
+      }
+    }
     return
   }
+
   if (!notification.postId) {
     alert('该通知关联的帖子已失效')
     return
