@@ -230,6 +230,21 @@ carpoolRouter.put('/:id/approve', auth, async (req, res) => {
       isRead: false
     }).save()
 
+    // 创建一条通知给自己，告知已同意
+    await new Notification({
+      type: 'carpool_self_result',
+      sender: req.user._id,
+      receiver: req.user._id,
+      carpoolId: carpool._id,
+      isRead: true
+    }).save()
+    // 删除原始的申请通知
+     await Notification.deleteOne({
+      type: 'carpool_request',
+      sender: applicantId,
+      receiver: req.user._id,
+      carpoolId: carpool._id
+    })
     res.json({ message: '已同意对方查看微信号' })
   } catch (err) {
     console.error('同意拼车申请失败', err)
@@ -269,6 +284,21 @@ carpoolRouter.put('/:id/reject', auth, async (req, res) => {
       isRead: false
     }).save()
 
+    // 创建一条通知给自己，告知已拒绝
+    await new Notification({
+      type: 'carpool_self_result',
+      sender: req.user._id,
+      receiver: req.user._id,
+      carpoolId: carpool._id,
+      isRead: true
+    }).save()
+    // 删除原始的申请通知
+    await Notification.deleteOne({
+      type: 'carpool_request',
+      sender: applicantId,
+      receiver: req.user._id,
+      carpoolId: carpool._id
+    })
     res.json({ message: '已拒绝该申请' })
   } catch (err) {
     console.error('拒绝拼车申请失败', err)

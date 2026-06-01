@@ -15,7 +15,8 @@ const typeLabels = {
   like_comment: '赞了你的评论',
   carpool_request: '想和你拼车',
   carpool_approve: '同意了你的拼车申请',
-  carpool_reject: '拒绝了你的拼车申请'
+  carpool_reject: '拒绝了你的拼车申请',
+  carpool_self_result: '你已处理拼车申请'
 }
 
 const typeIcons = {
@@ -25,7 +26,8 @@ const typeIcons = {
   like_comment: '/notification-like.svg',
   carpool_request: '/notification-car.svg',
   carpool_approve: '/notification-car.svg',
-  carpool_reject: '/notification-car.svg'
+  carpool_reject: '/notification-car.svg',
+  carpool_self_result: '/notification-car.svg'
 }
 
 
