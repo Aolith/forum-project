@@ -11,18 +11,14 @@ const offset = now.getTimezoneOffset() * 60000
 const localNow = new Date(now - offset).toISOString().slice(0, 16)
 const departureTime = ref(localNow)
 const minTime = localNow // 新增 minTime，值和默认值一样，但不会变
-const carpools = ref([])
-const myCarpool = computed(() => carpools.value.find(item => isOwner(item)))
+const myCarpool = ref(null) // 自己的订单
+const carpools = ref([])    // 匹配列表
 const destinationMap = {
   nanchang_station: '南昌站',
   nanchang_south: '南昌南站',
   nanchang_west: '南昌西站',
   nanchang_east: '南昌东站',
   changbei_airport: '昌北机场'
-}
-
-function isOwner(carpool) {
-  return carpool.user?._id === userStore.currentUser?._id
 }
 //发布拼车信息
 async function publish(){
@@ -80,7 +76,9 @@ async function match(){
       }
     })
     if (res.ok) {
-      carpools.value = await res.json()
+      const data = await res.json()
+      myCarpool.value = data.my
+      carpools.value = data.list
     } else {
       const data = await res.json()
       throw new Error(data.error || '匹配失败')
@@ -89,10 +87,6 @@ async function match(){
     alert('匹配失败，请稍后再试')
   }
 }
-//发布成功和进入页面自动调用一次
-onMounted(()=>{
-  match()
-})
 
 // 申请拼车
 async function applyCarpool(carpoolId) {
@@ -119,6 +113,11 @@ function formatDepartureTime(time) {
   const d = new Date(time)
   return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
+
+onMounted(() => {
+  match()
+  window.addEventListener('carpool-updated', match)
+})
 </script>
 
 <template>
@@ -147,6 +146,11 @@ function formatDepartureTime(time) {
     <div class="carpool-card">
       <p>目的地：{{ destinationMap[myCarpool.destination] || myCarpool.destination }}</p>
       <p>出发时间：{{ formatDepartureTime(myCarpool.departureTime) }}</p>
+      <p v-if="myCarpool.applicants && myCarpool.applicants.length > 0" class="applicants-count">
+      申请情况：共 {{ myCarpool.applicants.length }} 人申请
+      ({{ myCarpool.applicants.filter(a => a.status === 'pending').length }} 人待处理)
+      </p>
+      <p v-else class="applicants-count">暂无申请</p>
       <button class="cancel-btn" @click="cancel(myCarpool._id)">取消订单</button>
     </div>
   </div>
@@ -154,13 +158,13 @@ function formatDepartureTime(time) {
   <!-- 匹配列表 -->
   <div class="container-list">
     <!-- 等待中 -->
-    <div v-if="myCarpool && carpools.length === 1" class="waiting-card">
+    <div v-if="myCarpool && carpools.length === 0" class="waiting-card">
       正在等待其他拼友...
     </div>
     <!-- 无匹配 -->
-    <div v-else-if="carpools.length === 0">暂无匹配的拼车信息</div>
+    <div v-else-if="carpools.length === 0">暂无匹配的拼车信息</div> 
     <!-- 匹配列表（排除自己） -->
-    <div v-else v-for="item in carpools.filter(i => !isOwner(i))" :key="item._id" class="carpool-card">
+    <div v-else v-for="item in carpools" :key="item._id" class="carpool-card">
       <p>用户：{{ item.user?.name }}</p>
       <p>出发时间：{{ formatDepartureTime(item.departureTime) }}</p>
       <p>目的地：{{ destinationMap[item.destination] || item.destination }}</p>
@@ -356,5 +360,10 @@ li {
   background: #fde8e8;
   border-color: #c0392b;
   color: #c0392b;
+}
+/* 申请者数量显示 */
+.applicants-count {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
 }
 </style>

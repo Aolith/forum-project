@@ -7,23 +7,21 @@ const Notification=require('../models/Notification')
 //获取拼车信息
 carpoolRouter.get('/', auth, async (req, res) => {
   try {
+    const now = new Date()
+    //获取当前用户所有活跃的拼车订单
     const myCarpool = await Carpool.findOne({ user: req.user._id, status: 'active' })
     if (!myCarpool) {
-      return res.json([])
+      return res.json({ list: [], my: null })
     }
-    const { destination, departureTime } = req.query
-    if(!destination ){
-      destination = myCarpool.destination
-    }
-    if(!departureTime){
-      departureTime = myCarpool.departureTime
-    }
-    const now = new Date()
+    let { destination, departureTime } = req.query
+    if(!destination )destination = myCarpool.destination
+    if(!departureTime)departureTime = myCarpool.departureTime
+    
     const filter = {
       status: 'active',
       expireAt: { $gt: now },
-      destination: destination,  
-      user: { $ne: req.user._id }  
+      destination: destination,
+      user:{$ne: req.user._id}
     }
     if (destination) {
       filter.destination = destination
@@ -42,10 +40,13 @@ carpoolRouter.get('/', auth, async (req, res) => {
     }
 
     const carpools = await Carpool.find(filter)
-      .populate('user', 'name')
+      .populate('user', 'name _id')
+      .populate('applicants.user', 'name')
       .sort({ departureTime: 1 })
-
-    res.json(carpools)
+    const myOrder = await Carpool.findOne({ user: req.user._id, status: 'active' })
+      .populate('user', 'name _id')
+      .populate('applicants.user', 'name')
+    res.json({ list: carpools, my: myOrder })
   } catch (err) {
     console.error('获取拼车信息失败', err)
     res.status(500).json({ error: '服务器内部错误' })
@@ -107,6 +108,10 @@ carpoolRouter.post('/',auth, async (req, res) => {
     }
     if(!req.user.wechat){
       return res.status(400).json({ error: '请先去主页绑定微信号' })
+    }
+     const existing = await Carpool.findOne({ user: req.user._id, status: 'active' })
+    if (existing) {
+      return res.status(400).json({ error: '你已经有一个进行中的拼车订单，请先取消再发布新的' })
     }
     const newCarpool=new Carpool({
       user:req.user._id,

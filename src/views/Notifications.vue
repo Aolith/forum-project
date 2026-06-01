@@ -122,6 +122,7 @@ async function approveApplicant(carpoolId, applicantId) {
       if (notification && !notification.isRead) {
         notificationStore.decreaseUnreadCount()
       }
+      window.dispatchEvent(new Event('carpool-updated'))
     } else {
       const data = await res.json()
       throw new Error(data.error || '操作失败')
@@ -171,6 +172,7 @@ async function rejectApplicant(carpoolId, applicantId) {
       if (notification && !notification.isRead) {
         notificationStore.decreaseUnreadCount()
       }
+      window.dispatchEvent(new Event('carpool-updated'))
     } else {
       const data = await res.json()
       throw new Error(data.error || '操作失败')
