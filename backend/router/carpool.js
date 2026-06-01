@@ -98,7 +98,7 @@ carpoolRouter.post('/',auth, async (req, res) => {
     if(!departureTime || !destination){
       return res.status(400).json({ error: '请填写出发时间和目的地' })
     }
-    const departureDate = new Date(departureTime)
+    const departureDate = new Date(departureTime + ':00+08:00')
     // 校验是否为有效时间
     if (isNaN(departureDate.getTime())) {
       return res.status(400).json({ error: '出发时间格式不正确' })
